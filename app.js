@@ -198,7 +198,7 @@ loadSamples();
 
 // keyboard mapping (optional)
 window.addEventListener('keydown', e=>{
-  const mapKeys = ['a','s','d','f','g','h','j','k','l',';','\' ];
+  const mapKeys = ['a','s','d','f','g','h','j','k','l',';',"'"];
   const mapNotes = getAvailableNotes();
   const pos = mapKeys.indexOf(e.key);
   if(pos>=0 && mapNotes[pos]){
