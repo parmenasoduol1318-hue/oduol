@@ -1,0 +1,30 @@
+*{box-sizing:border-box;font-family:Inter,Segoe UI,Helvetica,Arial,sans-serif}
+body{background:#f3f6f9;color:#0b1220;margin:0;padding:20px}
+.app{max-width:900px;margin:0 auto}
+h1{margin:0 0 12px}
+.controls{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.message{margin-left:12px;font-weight:600}
+.lesson{background:#fff;border-radius:8px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+#staff{width:100%;height:140px}
+.keyboard{margin-top:12px;display:flex;gap:2px;user-select:none}
+.keyboard{margin-top:12px;user-select:none;position:relative}
+.white-keys{display:flex}
+.white-key{flex:1 1 48px;height:140px;border:1px solid #222;border-radius:4px;background:#fff;display:flex;align-items:flex-end;justify-content:center;position:relative;box-sizing:border-box}
+.white-key span{font-size:12px;padding:6px}
+.black-keys{position:absolute;top:0;left:0;right:0;height:100px;pointer-events:none}
+.black-key{width:34px;height:100px;background:#111;color:#fff;position:absolute;border-radius:4px;z-index:2;pointer-events:auto;display:flex;align-items:flex-end;justify-content:center}
+.key.correct{outline:3px solid #27ae60}
+.key.wrong{outline:3px solid #e74c3c}
+.footer{margin-top:10px;color:#666;font-size:13px}
+button{padding:8px 12px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;cursor:pointer}
+button:hover{background:#f7fafc}
+select{padding:6px;border-radius:6px}
+
+/* Responsive adjustments */
+@media (max-width:600px){
+	.controls{flex-wrap:wrap;gap:8px}
+	.white-key{height:110px}
+	.black-key{height:70px}
+}
+
+.score{font-weight:700;margin-left:8px}
