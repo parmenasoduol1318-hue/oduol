@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 oduol — Learn Piano & Read Music
 
 oduol is a progressive, browser-based learning app that teaches how to read musical notation, develop rhythm and ear, and apply those skills at the piano. This repository contains a minimal, extensible starter with:
@@ -37,3 +38,6 @@ Next steps you can ask me to implement
 - Add lesson progression, quizzes and graded assessments
 
 If you want, I can start by adding the metronome and rhythm lessons or include a small set of sample audio files into `samples/`.
+=======
+# oduol
+>>>>>>> 294795e795aac5a349cb6209e705bf305ddb5d3a
