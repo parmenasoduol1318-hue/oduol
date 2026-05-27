@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>oduol — Learn Piano & Read Music</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <h1>oduol — Learn Piano & Read Music</h1>
+    <div class="controls">
+      <button id="newNote">New Note</button>
+      <button id="playNote">Play Note</button>
+      <label>Mode:
+        <select id="mode">
+          <option value="listen">Listen & Identify</option>
+          <option value="read">Read & Play</option>
+        </select>
+      </label>
+      <label>Level:
+        <select id="levelSelect">
+          <option value="1">1 (white keys)</option>
+          <option value="2">2 (add sharps)</option>
+          <option value="3">3 (full)</option>
+        </select>
+      </label>
+      <div id="score" class="score">Score: 0 • Streak: 0</div>
+      <div id="message" class="message">Click "New Note" to start.</div>
+    </div>
+
+    <div class="lesson">
+      <svg id="staff" viewBox="0 0 700 140" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div id="keyboard" class="keyboard"></div>
+
+    <footer class="footer">oduol — Tip: Click a key or press the computer keyboard (letters shown on keys).</footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
