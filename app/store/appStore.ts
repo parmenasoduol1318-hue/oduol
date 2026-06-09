@@ -8,6 +8,8 @@ import {
   SuggestedReplies,
   ReplyStyle,
   MessageTone,
+  CurriculumProgress,
+  ModuleProgress,
 } from '@types/index';
 
 interface AppState {
@@ -15,6 +17,7 @@ interface AppState {
   recentMessages: Message[];
   suggestedReplies: SuggestedReplies[];
   favorites: Reply[];
+  curriculumProgress: CurriculumProgress;
 
   // Settings actions
   updateSettings: (settings: Partial<AppSettings>) => void;
@@ -31,6 +34,10 @@ interface AppState {
   addSuggestedReplies: (replies: SuggestedReplies) => void;
   addFavoriteReply: (reply: Reply) => void;
   removeFavoriteReply: (replyId: string) => void;
+  // Curriculum actions
+  unlockModule: (moduleId: string) => void;
+  markLessonComplete: (moduleId: string, lessonIndex: number, score?: number) => void;
+  resetCurriculumProgress: () => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -49,6 +56,10 @@ export const useAppStore = create<AppState>()(
       recentMessages: [],
       suggestedReplies: [],
       favorites: [],
+      curriculumProgress: {
+        modulesUnlocked: ['note-reading'],
+        modules: {},
+      },
 
       updateSettings: (newSettings) =>
         set((state) => ({
@@ -98,6 +109,49 @@ export const useAppStore = create<AppState>()(
       removeFavoriteReply: (replyId) =>
         set((state) => ({
           favorites: state.favorites.filter((r) => r.id !== replyId),
+        })),
+
+      unlockModule: (moduleId: string) =>
+        set((state) => ({
+          curriculumProgress: {
+            ...state.curriculumProgress,
+            modulesUnlocked: Array.from(new Set([...state.curriculumProgress.modulesUnlocked, moduleId])),
+          },
+        })),
+
+      markLessonComplete: (moduleId: string, lessonIndex: number, score?: number) =>
+        set((state) => {
+          const existing = state.curriculumProgress.modules[moduleId] || {
+            moduleId,
+            lessonsCompleted: 0,
+            lessonsTotal: 0,
+          } as ModuleProgress;
+
+          const updated: ModuleProgress = {
+            ...existing,
+            lessonsCompleted: Math.max(existing.lessonsCompleted, lessonIndex + 1),
+            lessonsTotal: Math.max(existing.lessonsTotal, lessonIndex + 1),
+            lastCompletedAt: Date.now(),
+            score: score ?? existing.score,
+          };
+
+          return {
+            curriculumProgress: {
+              ...state.curriculumProgress,
+              modules: {
+                ...state.curriculumProgress.modules,
+                [moduleId]: updated,
+              },
+            },
+          };
+        }),
+
+      resetCurriculumProgress: () =>
+        set(() => ({
+          curriculumProgress: {
+            modulesUnlocked: ['note-reading'],
+            modules: {},
+          },
         })),
     }),
     {

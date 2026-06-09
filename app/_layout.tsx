@@ -1,7 +1,7 @@
 import React from 'react';
 import { useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
-import { getTranslation } from '@locales/i18n';
+import { getTranslation } from './locales/i18n';
 import { useAppStore } from '@store/appStore';
 
 export default function RootLayout() {

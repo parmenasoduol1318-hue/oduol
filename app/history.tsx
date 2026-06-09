@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, useColorScheme } from 'react-native';
 import { useAppStore } from '@store/appStore';
-import { getTranslation } from '@locales/i18n';
-
+import { getTranslation } from './locales/i18n';
 export default function HistoryScreen() {
   const settings = useAppStore((state) => state.settings);
   const recentMessages = useAppStore((state) => state.recentMessages);

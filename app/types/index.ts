@@ -58,3 +58,17 @@ export interface CachedReply {
   replies: Reply[];
   cachedAt: number;
 }
+
+// Curriculum progress types
+export interface ModuleProgress {
+  moduleId: string;
+  lessonsCompleted: number;
+  lessonsTotal: number;
+  lastCompletedAt?: number;
+  score?: number; // optional aggregate score or percent
+}
+
+export interface CurriculumProgress {
+  modulesUnlocked: string[];
+  modules: Record<string, ModuleProgress>;
+}

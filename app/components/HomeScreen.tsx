@@ -13,8 +13,11 @@ import {
 } from 'react-native';
 import { useAppStore } from '@store/appStore';
 import ReplyService from '@services/ReplyService';
-import { getTranslation } from '@locales/i18n';
+
+
+import { getTranslation } from './locales/i18n';
 import { Reply, MessageTone, MessageIntent } from '@types/index';
+import Metronome from './Metronome';
 
 const HomeScreen = () => {
   const [messageInput, setMessageInput] = useState('');
@@ -234,6 +237,11 @@ const HomeScreen = () => {
             {loading ? t.home.analyzing : t.home.analyze}
           </Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Metronome / Rhythm tool */}
+      <View style={{ marginTop: 16 }}>
+        <Metronome />
       </View>
 
       {loading && (

@@ -69,3 +69,16 @@ Resources and Data
 - Provide links to free sample packs, MIDI utilities, and recommended books in the app.
 
 If you'd like, I can begin implementing Module 2 (Metronome & Rhythm) next, or add basic `localStorage` progress persistence. Which do you prefer?
+
+Progress (implementation notes)
+- Implemented: Module 2 — Metronome & basic rhythm tools (UI component and Web Audio utility).
+- Implemented: Progress persistence service that uses `localStorage` on web and `AsyncStorage` on native.
+- Implemented: Curriculum progress types and `zustand` store extension to track unlocked modules and lesson completions.
+
+Next steps
+- Integrate the `Metronome` UI into the app navigation (Home and Module pages).
+- Add interactive rhythm exercises, timed sight-reading drills, and short quizzes per lesson.
+- Add audio sample support and MIDI in/out for controller input.
+- Add import/export progress (JSON) and certificate/badge generation.
+
+If you want, I can continue by integrating the Metronome into the app navigation and building the first set of rhythm exercises.

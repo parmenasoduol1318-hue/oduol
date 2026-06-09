@@ -16,3 +16,5 @@ coverage/
 .prettierignore
 yarn-error.log
 npm-debug.log*
+.vercel
+.env*

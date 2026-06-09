@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, useColorScheme, StyleSheet } from 'react-native';
 import { Tabs } from 'expo-router';
-import { getTranslation } from '@locales/i18n';
+import { getTranslation } from './locales/i18n';
 import { useAppStore } from '@store/appStore';
 import HomeScreen from '@components/HomeScreen';
 

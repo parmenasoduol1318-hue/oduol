@@ -11,8 +11,11 @@ import {
   Picker,
 } from 'react-native';
 import { useAppStore } from '@store/appStore';
-import { getTranslation, Language } from '@locales/i18n';
+import { getTranslation, Language } from './locales/i18n';
 import { ReplyStyle } from '@types/index';
+import ExportService from '@services/ExportService';
+import BadgeGenerator from '@services/BadgeGenerator';
+import ProgressService from '@services/ProgressService';
 
 const SettingsScreen = () => {
   const settings = useAppStore((state) => state.settings);
@@ -43,6 +46,39 @@ const SettingsScreen = () => {
       theme: theme as 'light' | 'dark' | 'auto',
     });
     Alert.alert('Success', t.settings.saved);
+  };
+
+  const handleExport = async () => {
+    try {
+      const json = await ExportService.exportProgressJSON();
+      // On web, trigger download. On native, copy to clipboard or show text.
+      if (typeof window !== 'undefined' && window.navigator?.msSaveOrOpenBlob) {
+        const blob = new Blob([json], { type: 'application/json' });
+        (window.navigator as any).msSaveOrOpenBlob(blob, ExportService.generateDownloadFilename());
+      } else if (typeof window !== 'undefined') {
+        const a = document.createElement('a');
+        const file = new Blob([json], { type: 'application/json' });
+        a.href = URL.createObjectURL(file);
+        a.download = ExportService.generateDownloadFilename();
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } else {
+        Alert.alert('Export', 'Progress JSON ready. (On native, copy from debug logs)');
+      }
+    } catch (e) {
+      Alert.alert('Export failed', String(e));
+    }
+  };
+
+  const handleViewBadges = async () => {
+    try {
+      const progress = (await ProgressService.load()) || useAppStore.getState().curriculumProgress;
+      const badges = BadgeGenerator.generateBadges(progress);
+      Alert.alert('Badges', badges.map((b) => `${b.icon} ${b.name} — ${b.description}`).join('\n'));
+    } catch (e) {
+      Alert.alert('Error', 'Unable to load badges');
+    }
   };
 
   const styles = StyleSheet.create({
@@ -182,6 +218,16 @@ const SettingsScreen = () => {
       <TouchableOpacity style={styles.button} onPress={handleSaveSettings}>
         <Text style={styles.buttonText}>{t.settings.save}</Text>
       </TouchableOpacity>
+
+      <View style={{ marginTop: 16 }}>
+        <TouchableOpacity style={styles.button} onPress={handleExport}>
+          <Text style={styles.buttonText}>Export Progress (JSON)</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, { marginTop: 8 }]} onPress={handleViewBadges}>
+          <Text style={styles.buttonText}>View Badges</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
