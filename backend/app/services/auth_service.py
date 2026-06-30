@@ -44,21 +44,14 @@ class AuthService:
         verification_token = generate_token()
 
         new_user = User(
-            email=user.email,
-            username=user.username,
-            full_name=user.full_name,
-            hashed_password=hash_password(user.password),
-            avatar=None,
-            language="en",
-            timezone="UTC",
-            theme="system",
-            provider="email",
-            is_active=True,
-            is_verified=False,
-            is_admin=False,
-            is_pro=False,
-            verification_token=verification_token,
-        )
+    email=user.email,
+    username=user.username,
+    full_name=user.full_name,
+    hashed_password=hash_password(user.password),
+    is_active=True,
+    is_verified=False,
+    is_admin=False,
+)
 
         db.add(new_user)
         db.commit()

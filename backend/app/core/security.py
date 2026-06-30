@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import secrets
 
 from jose import jwt
 from passlib.context import CryptContext
@@ -9,6 +10,8 @@ pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto",
 )
+
+REFRESH_EXPIRE_DAYS = 30
 
 
 def hash_password(password: str):
@@ -26,15 +29,13 @@ def create_access_token(data: dict):
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
 
-    payload.update({"exp": expire})
+    payload["exp"] = expire
 
     return jwt.encode(
         payload,
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM,
     )
-
-    REFRESH_EXPIRE_DAYS = 30
 
 
 def create_refresh_token(data: dict):
@@ -44,20 +45,14 @@ def create_refresh_token(data: dict):
         days=REFRESH_EXPIRE_DAYS
     )
 
-    payload.update(
-        {
-            "exp": expire,
-            "type": "refresh",
-        }
-    )
+    payload["exp"] = expire
+    payload["type"] = "refresh"
 
     return jwt.encode(
         payload,
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM,
     )
-
-    import secrets
 
 
 def generate_token():

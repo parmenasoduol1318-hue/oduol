@@ -8,102 +8,262 @@ from app.services.chat_service import ChatService
 
 class AIService:
     """
-    Main AI service layer that connects:
-    - AI workflows
-    - Chat system
-    - Memory (future extension)
+    SwiftReply AI Service
+
+    Bridges:
+    - API
+    - AI Workflows
+    - Chat Storage
     """
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.workflows = AIWorkflows()
         self.chat_service = ChatService()
 
     # =========================================================
-    # Chat AI
+    # Chat
     # =========================================================
 
     async def chat(
         self,
         db: Session,
-        user_id: int,
-        chat_id: int,
-        message: str,
-    ) -> str:
+        user,
+        payload,
+    ):
         """
-        Send message to AI and store response in chat.
+        Main chat endpoint.
         """
 
-        # Save user message
+        # Store user message
         self.chat_service.add_message(
             db=db,
-            chat_id=chat_id,
-            user_id=user_id,
+            chat_id=payload.chat_id,
+            user_id=user.id,
             role="user",
-            content=message,
+            content=payload.prompt,
         )
 
-        # Generate AI response
-        response = await self.workflows.chat(message)
+        # AI response
+        response = await self.workflows.chat(
+            payload.prompt
+        )
 
-        # Save assistant response
+        # Store assistant response
         self.chat_service.add_message(
             db=db,
-            chat_id=chat_id,
-            user_id=user_id,
+            chat_id=payload.chat_id,
+            user_id=user.id,
             role="assistant",
             content=response,
         )
 
-        return response
+        return {
+            "response": response,
+            "chat_id": payload.chat_id,
+        }
 
     # =========================================================
-    # Smart reply
+    # Rewrite
     # =========================================================
 
-    async def smart_reply(self, message: str) -> str:
-        return await self.workflows.smart_reply(message)
+    async def rewrite(
+        self,
+        user,
+        payload,
+    ):
+        result = await self.workflows.rewrite(
+            payload.text,
+        )
+
+        return {
+            "result": result,
+        }
 
     # =========================================================
-    # Writing
+    # Translate
     # =========================================================
 
-    async def write(self, topic: str) -> str:
-        return await self.workflows.write_content(topic)
+    async def translate(
+        self,
+        user,
+        payload,
+    ):
+        result = await self.workflows.translate(
+            text=payload.text,
+            target_language=payload.target_language,
+        )
+
+        return {
+            "result": result,
+        }
 
     # =========================================================
-    # Coding
+    # Summarize
     # =========================================================
 
-    async def build_feature(self, requirement: str) -> str:
-        return await self.workflows.build_feature(requirement)
+    async def summarize(
+        self,
+        user,
+        payload,
+    ):
+        result = await self.workflows.summarize(
+            payload.text,
+        )
 
-    async def debug(self, code: str, error: str) -> str:
-        return await self.workflows.debug(code, error)
+        return {
+            "result": result,
+        }
 
     # =========================================================
     # Research
     # =========================================================
 
-    async def research(self, topic: str) -> str:
-        return await self.workflows.research(topic)
+    async def research(
+        self,
+        user,
+        payload,
+    ):
+        result = await self.workflows.research(
+            payload.topic,
+        )
+
+        return {
+            "result": result,
+        }
 
     # =========================================================
-    # Planning
+    # Code Assistant
     # =========================================================
 
-    async def plan(self, goal: str) -> str:
-        return await self.workflows.plan(goal)
+    async def code(
+        self,
+        user,
+        payload,
+    ):
+        result = await self.workflows.build_feature(
+            payload.prompt,
+        )
+
+        return {
+            "result": result,
+        }
+
+    # =========================================================
+    # Image Generation
+    # =========================================================
+
+    async def generate_image(
+        self,
+        user,
+        payload,
+    ):
+        image = await self.workflows.generate_image(
+            prompt=payload.prompt,
+        )
+
+        return {
+            "image": image,
+        }
 
     # =========================================================
     # Vision
     # =========================================================
 
-    async def analyze_image(self, prompt: str, image: bytes) -> str:
-        return await self.workflows.analyze_image(prompt, image)
+    async def analyze_image(
+        self,
+        user,
+        image,
+    ):
+        data = await image.read()
+
+        result = await self.workflows.analyze_image(
+            prompt="Describe this image.",
+            image=data,
+        )
+
+        return {
+            "result": result,
+        }
 
     # =========================================================
-    # Voice
+    # Speech To Text
     # =========================================================
 
-    async def process_voice(self, prompt: str, audio: bytes) -> str:
-        return await self.workflows.process_voice(prompt, audio)
+    async def speech_to_text(
+        self,
+        user,
+        audio,
+    ):
+        data = await audio.read()
+
+        result = await self.workflows.process_voice(
+            prompt="Transcribe this audio.",
+            audio=data,
+        )
+
+        return {
+            "text": result,
+        }
+
+    # =========================================================
+    # Text To Speech
+    # =========================================================
+
+    async def text_to_speech(
+        self,
+        user,
+        text,
+        voice="alloy",
+    ):
+        result = await self.workflows.text_to_speech(
+            text=text,
+            voice=voice,
+        )
+
+        return {
+            "audio": result,
+        }
+
+    # =========================================================
+    # Embeddings
+    # =========================================================
+
+    async def create_embeddings(
+        self,
+        user,
+        text,
+    ):
+        embeddings = await self.workflows.embeddings(
+            text,
+        )
+
+        return {
+            "embeddings": embeddings,
+        }
+
+    # =========================================================
+    # Prompt Suggestions
+    # =========================================================
+
+    async def prompt_suggestions(
+        self,
+        user,
+    ):
+        return {
+            "suggestions": [
+                "Write a blog about AI",
+                "Summarize this document",
+                "Translate to Swahili",
+                "Generate Python code",
+                "Explain this image",
+                "Create a business plan",
+                "Research this topic",
+            ]
+        }
+
+
+# =========================================================
+# Singleton Instance
+# =========================================================
+
+ai_service = AIService()

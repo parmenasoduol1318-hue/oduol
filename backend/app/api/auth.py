@@ -44,7 +44,6 @@ def register(
 # ==========================================================
 # Login
 # ==========================================================
-
 @router.post(
     "/login",
     response_model=Token,
@@ -54,35 +53,16 @@ def login(
     db: Session = Depends(get_db),
 ):
 
-    user = AuthService.authenticate(
-        db,
-        credentials.email,
-        credentials.password,
-    )
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password.",
-        )
-
-    access_token = create_access_token(
-        data={"sub": str(user.id)},
-        expires_delta=timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        ),
-    )
-
-    refresh_token = create_refresh_token(
-        data={"sub": str(user.id)},
+    result = AuthService.login(
+        db=db,
+        user=credentials,
     )
 
     return Token(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
+        access_token=result["access_token"],
+        refresh_token=result["refresh_token"],
+        token_type=result["token_type"],
     )
-
 
 # ==========================================================
 # Refresh Token

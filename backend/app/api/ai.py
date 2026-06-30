@@ -1,11 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 
-from app.dependencies import (
-    get_db,
-    get_current_user,
-)
-
+from app.dependencies import get_db, get_current_user
 from app.models.user import User
 
 from app.schemas.ai import (
@@ -20,7 +16,7 @@ from app.schemas.ai import (
     AICodeRequest,
 )
 
-from app.services.ai_service import AIService
+from app.services.ai_service import ai_service
 
 router = APIRouter()
 
@@ -38,7 +34,7 @@ async def chat(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.chat(
+    return await ai_service.chat(
         db=db,
         user=current_user,
         payload=payload,
@@ -54,7 +50,7 @@ async def rewrite(
     payload: AIRewriteRequest,
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.rewrite(
+    return await ai_service.rewrite(
         user=current_user,
         payload=payload,
     )
@@ -69,7 +65,7 @@ async def translate(
     payload: AITranslateRequest,
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.translate(
+    return await ai_service.translate(
         user=current_user,
         payload=payload,
     )
@@ -84,7 +80,7 @@ async def summarize(
     payload: AISummarizeRequest,
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.summarize(
+    return await ai_service.summarize(
         user=current_user,
         payload=payload,
     )
@@ -99,14 +95,14 @@ async def research(
     payload: AIResearchRequest,
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.research(
+    return await ai_service.research(
         user=current_user,
         payload=payload,
     )
 
 
 # ==========================================================
-# Code Assistant
+# Code
 # ==========================================================
 
 @router.post("/code")
@@ -114,40 +110,40 @@ async def code(
     payload: AICodeRequest,
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.code(
+    return await ai_service.code(
         user=current_user,
         payload=payload,
     )
 
 
 # ==========================================================
-# Generate Image
+# Image Generation
 # ==========================================================
 
 @router.post(
     "/image",
     response_model=AIImageResponse,
 )
-async def generate_image(
+async def image(
     payload: AIImageRequest,
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.generate_image(
+    return await ai_service.generate_image(
         user=current_user,
         payload=payload,
     )
 
 
 # ==========================================================
-# Analyze Image
+# Vision
 # ==========================================================
 
 @router.post("/vision")
-async def analyze_image(
+async def vision(
     image: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.analyze_image(
+    return await ai_service.analyze_image(
         user=current_user,
         image=image,
     )
@@ -162,7 +158,7 @@ async def speech_to_text(
     audio: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.speech_to_text(
+    return await ai_service.speech_to_text(
         user=current_user,
         audio=audio,
     )
@@ -178,7 +174,7 @@ async def text_to_speech(
     voice: str = "alloy",
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.text_to_speech(
+    return await ai_service.text_to_speech(
         user=current_user,
         text=text,
         voice=voice,
@@ -190,11 +186,11 @@ async def text_to_speech(
 # ==========================================================
 
 @router.post("/embeddings")
-async def create_embeddings(
+async def embeddings(
     text: str,
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.create_embeddings(
+    return await ai_service.create_embeddings(
         user=current_user,
         text=text,
     )
@@ -205,9 +201,9 @@ async def create_embeddings(
 # ==========================================================
 
 @router.get("/prompts")
-async def prompt_suggestions(
+async def prompts(
     current_user: User = Depends(get_current_user),
 ):
-    return await AIService.prompt_suggestions(
+    return await ai_service.prompt_suggestions(
         user=current_user,
     )
