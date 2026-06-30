@@ -6,7 +6,7 @@ import {
   TextInput,
   StyleSheet,
 } from 'react-native';
-import MetronomeAudio from '@utils/audioMetronome';
+import MetronomeAudio from 'frontend/utils/audioMetronome';
 
 const Metronome = () => {
   const [bpm, setBpm] = useState<number>(80);

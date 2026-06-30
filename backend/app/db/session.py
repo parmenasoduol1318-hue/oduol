@@ -1,0 +1,15 @@
+from sqlalchemy.orm import Session
+
+from app.db.database import SessionLocal
+
+
+def get_db():
+    """
+    FastAPI dependency that provides a DB session.
+    Ensures proper closing after request lifecycle.
+    """
+    db: Session = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

@@ -8,7 +8,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAppStore } from '@store/appStore';
+import { useAppStore } from 'frontend/store/appStore';
 
 const CurriculumScreen = () => {
   const router = useRouter();

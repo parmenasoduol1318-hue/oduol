@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Animated } from 'react-native';
-import MetronomeAudio from '@utils/audioMetronome';
-import SamplePlayer from '@utils/SamplePlayer';
+import MetronomeAudio from 'frontend/utils/audioMetronome';
+import SamplePlayer from 'frontend/utils/SamplePlayer';
 
 type Props = {
   onComplete?: (score: number) => void;

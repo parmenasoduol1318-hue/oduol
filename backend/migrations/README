@@ -1,0 +1,37 @@
+# SwiftReply Backend 🚀
+
+A production-ready AI-powered backend built with **FastAPI**, supporting:
+- Chat AI assistant
+- Voice chat
+- Image analysis & generation
+- File uploads
+- Memory system (long-term AI memory)
+- Payments (M-Pesa + PayPal ready)
+- Subscriptions system
+- Notifications
+- Analytics dashboard
+- OAuth authentication
+- JWT security
+
+---
+
+## ⚙️ Tech Stack
+
+- FastAPI
+- PostgreSQL + SQLAlchemy
+- Alembic (migrations)
+- OpenAI API
+- Firebase (push notifications)
+- Cloudinary (file storage)
+- M-Pesa Daraja API
+- Resend (email service)
+- Docker
+
+---
+
+## 🚀 Setup
+
+### 1. Clone project
+```bash
+git clone https://your-repo-url
+cd backend

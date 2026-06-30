@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, useColorScheme, Share, Alert } from 'react-native';
-import { useAppStore } from '@store/appStore';
-import { getTranslation } from './locales/i18n';
+import { useAppStore } from 'frontend/store/appStore';
+import { getTranslation } from '../frontend/locales/i18n';
 
 export default function FavoritesScreen() {
   const settings = useAppStore((state) => state.settings);
