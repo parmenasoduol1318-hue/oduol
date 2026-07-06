@@ -1,295 +1,248 @@
-import React, { useState, useCallback } from 'react';
+// components/chat/HomeScreen.tsx
+
+import React from "react";
 import {
   View,
-  TextInput,
-  TouchableOpacity,
   Text,
-  ScrollView,
-  ActivityIndicator,
-  Share,
-  Alert,
   StyleSheet,
-  useColorScheme,
-} from 'react-native';
-import { useAppStore } from 'frontend/store/appStore';
-import ReplyService from '@services/ReplyService';
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
+const suggestions = [
+  "Explain Quantum Computing",
+  "Write a professional email",
+  "Generate a business idea",
+  "Help me debug Python code",
+  "Summarize a PDF",
+  "Translate English to Swahili",
+];
 
-import { getTranslation } from './locales/i18n';
-import { Reply, MessageTone, MessageIntent } from '@types/index';
-import Metronome from './Metronome';
-
-const HomeScreen = () => {
-  const [messageInput, setMessageInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [detectedTone, setDetectedTone] = useState<MessageTone | null>(null);
-  const [detectedIntent, setDetectedIntent] = useState<MessageIntent | null>(
-    null
-  );
-  const [replies, setReplies] = useState<Reply[]>([]);
-
-  const settings = useAppStore((state) => state.settings);
-  const addMessage = useAppStore((state) => state.addMessage);
-  const addSuggestedReplies = useAppStore((state) => state.addSuggestedReplies);
-  const addFavoriteReply = useAppStore((state) => state.addFavoriteReply);
-
-  const t = getTranslation(settings.preferredLanguage as 'en' | 'sw' | 'fr' | 'ar');
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
-  const analyzeMessage = useCallback(async () => {
-    if (!messageInput.trim()) {
-      Alert.alert('Error', 'Please enter a message to analyze');
-      return;
-    }
-
-    if (!settings.openaiApiKey) {
-      Alert.alert('Configuration Required', 'Please add your OpenAI API key in settings first');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const replyService = new ReplyService(settings.openaiApiKey);
-
-      // Analyze message
-      const analysis = await replyService.analyzeMessage(
-        messageInput,
-        settings.preferredLanguage
-      );
-
-      setDetectedTone(analysis.tone);
-      setDetectedIntent(analysis.intent);
-
-      // Generate replies
-      const suggestedReplies = await replyService.generateReplies(
-        messageInput,
-        analysis.tone,
-        analysis.intent,
-        settings.preferredLanguage,
-        [
-          'short',
-          'friendly',
-          'formal',
-          'funny',
-          'creative',
-        ]
-      );
-
-      setReplies(suggestedReplies);
-
-      // Store in history
-      addMessage({
-        id: `msg-${Date.now()}`,
-        content: messageInput,
-        detectedTone: analysis.tone,
-        detectedIntent: analysis.intent,
-        language: settings.preferredLanguage,
-        timestamp: Date.now(),
-      });
-
-      addSuggestedReplies({
-        messageId: `msg-${Date.now()}`,
-        replies: suggestedReplies,
-        generatedAt: Date.now(),
-      });
-    } catch (error) {
-      console.error('Error analyzing message:', error);
-      Alert.alert('Error', 'Failed to analyze message. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [messageInput, settings, addMessage, addSuggestedReplies]);
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await Share.share({
-        message: text,
-      });
-    } catch (error) {
-      console.error('Error copying:', error);
-    }
+export default function HomeScreen() {
+  const openNewChat = () => {
+    router.push("/chat/1");
   };
-
-  const handleAddFavorite = (reply: Reply) => {
-    addFavoriteReply(reply);
-    Alert.alert('Success', t.home.addFavorite);
-  };
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 16,
-      backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5',
-    },
-    inputSection: {
-      marginBottom: 16,
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: isDark ? '#333' : '#ddd',
-      borderRadius: 8,
-      padding: 12,
-      minHeight: 100,
-      backgroundColor: isDark ? '#2a2a2a' : '#fff',
-      color: isDark ? '#fff' : '#000',
-      textAlignVertical: 'top',
-      marginBottom: 12,
-    },
-    button: {
-      backgroundColor: '#007AFF',
-      padding: 12,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    buttonText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    analysisSection: {
-      marginBottom: 16,
-      padding: 12,
-      backgroundColor: isDark ? '#2a2a2a' : '#fff',
-      borderRadius: 8,
-    },
-    label: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      color: isDark ? '#aaa' : '#666',
-      marginBottom: 4,
-    },
-    value: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: isDark ? '#fff' : '#000',
-      marginBottom: 8,
-    },
-    repliesSection: {
-      flex: 1,
-    },
-    replyCard: {
-      backgroundColor: isDark ? '#2a2a2a' : '#fff',
-      padding: 12,
-      marginBottom: 8,
-      borderRadius: 8,
-      borderLeftWidth: 4,
-      borderLeftColor: '#007AFF',
-    },
-    replyStyle: {
-      fontSize: 12,
-      backgroundColor: '#007AFF',
-      color: '#fff',
-      paddingVertical: 2,
-      paddingHorizontal: 6,
-      borderRadius: 4,
-      alignSelf: 'flex-start',
-      marginBottom: 4,
-      overflow: 'hidden',
-    },
-    replyContent: {
-      fontSize: 14,
-      color: isDark ? '#fff' : '#000',
-      marginBottom: 8,
-      lineHeight: 20,
-    },
-    replyActions: {
-      flexDirection: 'row',
-      gap: 8,
-    },
-    replyButton: {
-      paddingVertical: 6,
-      paddingHorizontal: 12,
-      borderRadius: 4,
-      backgroundColor: '#f0f0f0',
-    },
-    replyButtonText: {
-      fontSize: 12,
-      color: '#007AFF',
-      fontWeight: '500',
-    },
-    loadingContainer: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: 200,
-    },
-  });
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.inputSection}>
-        <TextInput
-          style={styles.input}
-          placeholder={t.home.placeholder}
-          placeholderTextColor={isDark ? '#666' : '#ccc'}
-          value={messageInput}
-          onChangeText={setMessageInput}
-          multiline
-          editable={!loading}
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.logoContainer}>
+        <View style={styles.logo}>
+          <Ionicons
+            name="sparkles"
+            size={48}
+            color="#2563EB"
+          />
+        </View>
+
+        <Text style={styles.title}>SwiftReply</Text>
+
+        <Text style={styles.subtitle}>
+          Your intelligent AI assistant
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.newChatButton}
+        onPress={openNewChat}
+      >
+        <Ionicons
+          name="add-circle-outline"
+          size={22}
+          color="#FFFFFF"
         />
+
+        <Text style={styles.newChatText}>
+          Start New Chat
+        </Text>
+      </TouchableOpacity>
+
+      <Text style={styles.sectionTitle}>
+        Try asking...
+      </Text>
+
+      {suggestions.map((item, index) => (
         <TouchableOpacity
-          style={[styles.button, { opacity: loading ? 0.6 : 1 }]}
-          onPress={analyzeMessage}
-          disabled={loading}
+          key={index}
+          style={styles.card}
+          onPress={openNewChat}
         >
-          <Text style={styles.buttonText}>
-            {loading ? t.home.analyzing : t.home.analyze}
+          <Ionicons
+            name="chatbubble-ellipses-outline"
+            size={22}
+            color="#2563EB"
+          />
+
+          <Text style={styles.cardText}>
+            {item}
           </Text>
         </TouchableOpacity>
+      ))}
+
+      <View style={styles.features}>
+        <Feature
+          icon="chatbubble-outline"
+          title="AI Chat"
+        />
+
+        <Feature
+          icon="mic-outline"
+          title="Voice Assistant"
+        />
+
+        <Feature
+          icon="image-outline"
+          title="AI Images"
+        />
+
+        <Feature
+          icon="document-text-outline"
+          title="Summaries"
+        />
+
+        <Feature
+          icon="language-outline"
+          title="Translation"
+        />
+
+        <Feature
+          icon="code-slash-outline"
+          title="Coding"
+        />
       </View>
-
-      {/* Metronome / Rhythm tool */}
-      <View style={{ marginTop: 16 }}>
-        <Metronome />
-      </View>
-
-      {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-        </View>
-      )}
-
-      {detectedTone && detectedIntent && !loading && (
-        <>
-          <View style={styles.analysisSection}>
-            <Text style={styles.label}>{t.home.tone}</Text>
-            <Text style={styles.value}>{t.tones[detectedTone]}</Text>
-
-            <Text style={styles.label}>{t.home.intent}</Text>
-            <Text style={styles.value}>{t.intents[detectedIntent]}</Text>
-          </View>
-
-          <View style={styles.repliesSection}>
-            <Text style={[styles.label, { marginBottom: 12 }]}>
-              {t.home.replies}
-            </Text>
-
-            {replies.map((reply) => (
-              <View key={reply.id} style={styles.replyCard}>
-                <Text style={styles.replyStyle}>{reply.style}</Text>
-                <Text style={styles.replyContent}>{reply.content}</Text>
-                <View style={styles.replyActions}>
-                  <TouchableOpacity
-                    style={styles.replyButton}
-                    onPress={() => copyToClipboard(reply.content)}
-                  >
-                    <Text style={styles.replyButtonText}>{t.home.copy}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.replyButton}
-                    onPress={() => handleAddFavorite(reply)}
-                  >
-                    <Text style={styles.replyButtonText}>⭐</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
-        </>
-      )}
     </ScrollView>
   );
-};
+}
 
-export default HomeScreen;
+function Feature({
+  icon,
+  title,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+}) {
+  return (
+    <View style={styles.feature}>
+      <Ionicons
+        name={icon}
+        size={30}
+        color="#2563EB"
+      />
+
+      <Text style={styles.featureText}>
+        {title}
+      </Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+  },
+
+  content: {
+    padding: 24,
+    paddingTop: 60,
+    paddingBottom: 40,
+  },
+
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 35,
+  },
+
+  logo: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "#DBEAFE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  title: {
+    fontSize: 34,
+    fontWeight: "800",
+    color: "#2563EB",
+  },
+
+  subtitle: {
+    marginTop: 8,
+    fontSize: 16,
+    color: "#6B7280",
+    textAlign: "center",
+  },
+
+  newChatButton: {
+    backgroundColor: "#2563EB",
+    borderRadius: 14,
+    paddingVertical: 16,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 32,
+  },
+
+  newChatText: {
+    color: "#FFFFFF",
+    fontSize: 17,
+    fontWeight: "700",
+    marginLeft: 8,
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 18,
+    color: "#111827",
+  },
+
+  card: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  cardText: {
+    marginLeft: 12,
+    fontSize: 16,
+    color: "#111827",
+  },
+
+  features: {
+    marginTop: 35,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+
+  feature: {
+    width: "48%",
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 24,
+    marginBottom: 16,
+    borderRadius: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+
+  featureText: {
+    marginTop: 10,
+    fontWeight: "600",
+    color: "#374151",
+  },
+});

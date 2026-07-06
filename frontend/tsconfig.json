@@ -1,51 +1,90 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    /* ==========================================
+       Language
+    ========================================== */
+    "target": "ES2021",
     "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
+      "ES2021",
+      "DOM"
     ],
-    "jsx": "react-jsx",
     "module": "ESNext",
-    "target": "ES2020",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+
+    /* ==========================================
+       Strictness
+    ========================================== */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    /* ==========================================
+       Quality
+    ========================================== */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    /* ==========================================
+       Imports
+    ========================================== */
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./app/*"
-      ],
-      "@components/*": [
-        "./app/components/*"
-      ],
-      "@services/*": [
-        "./app/services/*"
-      ],
-      "@utils/*": [
-        "frontend/utils/*"
-      ],
-      "@types/*": [
-        "./app/types/*"
-      ],
-      "@store/*": [
-        "./app/store/*"
-      ]
-    }
+      "@/*": ["./*"],
+      "@/api/*": ["api/*"],
+      "@/assets/*": ["assets/*"],
+      "@/components/*": ["components/*"],
+      "@/constants/*": ["constants/*"],
+      "@/contexts/*": ["contexts/*"],
+      "@/db/*": ["db/*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/navigation/*": ["navigation/*"],
+      "@/screens/*": ["screens/*"],
+      "@/services/*": ["services/*"],
+      "@/store/*": ["store/*"],
+      "@/types/*": ["types/*"],
+      "@/utils/*": ["utils/*"]
+    },
+
+    /* ==========================================
+       Interop
+    ========================================== */
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    /* ==========================================
+       React Native
+    ========================================== */
+    "allowJs": false,
+    "checkJs": false,
+    "types": [
+      "react",
+      "react-native"
+    ]
   },
+
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "expo-env.d.ts"
   ],
+
   "exclude": [
-    "node_modules"
-  ],
-  "extends": "expo/tsconfig.base"
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "dist",
+    "build"
+  ]
 }

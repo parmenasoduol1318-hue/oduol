@@ -1,55 +1,108 @@
-import React from 'react';
-import { useColorScheme } from 'react-native';
-import { Stack } from 'expo-router';
-import { getTranslation } from './locales/i18n';
-import { useAppStore } from 'frontend/store/appStore';
+import React from "react";
+import { Tabs } from "expo-router";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 
-export default function RootLayout() {
-  const settings = useAppStore((state) => state.settings);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark' || settings.theme === 'dark';
-
-  const t = getTranslation(settings.preferredLanguage as 'en' | 'sw' | 'fr' | 'ar');
-
+export default function TabsLayout() {
   return (
-    <Stack
+    <Tabs
       screenOptions={{
-        headerStyle: {
-          backgroundColor: isDark ? '#1a1a1a' : '#fff',
-        },
-        headerTintColor: isDark ? '#fff' : '#000',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-        contentStyle: {
-          backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5',
+        headerShown: false,
+        tabBarActiveTintColor: "#2563EB",
+        tabBarInactiveTintColor: "#6B7280",
+        tabBarStyle: {
+          height: 65,
+          paddingBottom: 8,
+          paddingTop: 8,
+          borderTopWidth: 0.5,
         },
       }}
     >
-      <Stack.Screen
+      <Tabs.Screen
         name="index"
         options={{
-          title: t.app.name,
+          title: "Home",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="home"
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
-      <Stack.Screen
-        name="favorites"
+
+      <Tabs.Screen
+        name="chats"
         options={{
-          title: t.navigation.favorites,
+          title: "Chats",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="chatbubbles"
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
-      <Stack.Screen
+
+      <Tabs.Screen
         name="history"
         options={{
-          title: t.navigation.history,
+          title: "History",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="history"
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
-      <Stack.Screen
+
+      <Tabs.Screen
+        name="images"
+        options={{
+          title: "Images",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="images"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="settings"
         options={{
-          title: t.settings.title,
+          title: "Settings",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="settings"
+              size={size}
+              color={color}
+            />
+          ),
         }}
       />
-    </Stack>
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="person-circle"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+    </Tabs>
   );
 }

@@ -1,162 +1,165 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  AppSettings,
-  Message,
-  Reply,
-  SuggestedReplies,
-  ReplyStyle,
-  MessageTone,
-  CurriculumProgress,
-  ModuleProgress,
-} from '@types/index';
+// frontend/store/appStore.ts
+
+import { create } from "zustand";
+
+export type ThemeMode =
+  | "light"
+  | "dark"
+  | "system";
+
+export type Language =
+  | "en"
+  | "sw";
 
 interface AppState {
-  settings: AppSettings;
-  recentMessages: Message[];
-  suggestedReplies: SuggestedReplies[];
-  favorites: Reply[];
-  curriculumProgress: CurriculumProgress;
+  /* ==========================================
+     App
+  ========================================== */
 
-  // Settings actions
-  updateSettings: (settings: Partial<AppSettings>) => void;
-  setApiKey: (apiKey: string) => void;
-  setPreferredLanguage: (language: string) => void;
-  setPreferredReplyStyle: (style: ReplyStyle) => void;
-  setTheme: (theme: 'light' | 'dark' | 'auto') => void;
+  initialized: boolean;
 
-  // Message actions
-  addMessage: (message: Message) => void;
-  clearMessages: () => void;
+  loading: boolean;
 
-  // Reply actions
-  addSuggestedReplies: (replies: SuggestedReplies) => void;
-  addFavoriteReply: (reply: Reply) => void;
-  removeFavoriteReply: (replyId: string) => void;
-  // Curriculum actions
-  unlockModule: (moduleId: string) => void;
-  markLessonComplete: (moduleId: string, lessonIndex: number, score?: number) => void;
-  resetCurriculumProgress: () => void;
+  online: boolean;
+
+  /* ==========================================
+     Theme
+  ========================================== */
+
+  theme: ThemeMode;
+
+  /* ==========================================
+     Language
+  ========================================== */
+
+  language: Language;
+
+  /* ==========================================
+     Sidebar
+  ========================================== */
+
+  sidebarOpen: boolean;
+
+  /* ==========================================
+     Global Search
+  ========================================== */
+
+  searchQuery: string;
+
+  /* ==========================================
+     Actions
+  ========================================== */
+
+  setInitialized: (
+    value: boolean
+  ) => void;
+
+  setLoading: (
+    value: boolean
+  ) => void;
+
+  setOnline: (
+    value: boolean
+  ) => void;
+
+  setTheme: (
+    theme: ThemeMode
+  ) => void;
+
+  setLanguage: (
+    language: Language
+  ) => void;
+
+  setSidebarOpen: (
+    value: boolean
+  ) => void;
+
+  toggleSidebar: () => void;
+
+  setSearchQuery: (
+    value: string
+  ) => void;
+
+  reset: () => void;
 }
 
-const defaultSettings: AppSettings = {
-  openaiApiKey: '',
-  preferredLanguage: 'en',
-  preferredReplyStyle: 'friendly',
-  enableOfflineMode: true,
-  theme: 'light',
-  autoDetectTone: true,
+const initialState = {
+  initialized: false,
+
+  loading: false,
+
+  online: true,
+
+  theme: "system" as ThemeMode,
+
+  language: "en" as Language,
+
+  sidebarOpen: false,
+
+  searchQuery: "",
 };
 
-export const useAppStore = create<AppState>()(
-  persist(
-    (set) => ({
-      settings: defaultSettings,
-      recentMessages: [],
-      suggestedReplies: [],
-      favorites: [],
-      curriculumProgress: {
-        modulesUnlocked: ['note-reading'],
-        modules: {},
-      },
+export const useAppStore =
+  create<AppState>((set) => ({
+    ...initialState,
 
-      updateSettings: (newSettings) =>
-        set((state) => ({
-          settings: { ...state.settings, ...newSettings },
-        })),
+    setInitialized: (
+      value
+    ) =>
+      set({
+        initialized: value,
+      }),
 
-      setApiKey: (apiKey) =>
-        set((state) => ({
-          settings: { ...state.settings, openaiApiKey: apiKey },
-        })),
+    setLoading: (
+      value
+    ) =>
+      set({
+        loading: value,
+      }),
 
-      setPreferredLanguage: (language) =>
-        set((state) => ({
-          settings: { ...state.settings, preferredLanguage: language },
-        })),
+    setOnline: (
+      value
+    ) =>
+      set({
+        online: value,
+      }),
 
-      setPreferredReplyStyle: (style) =>
-        set((state) => ({
-          settings: { ...state.settings, preferredReplyStyle: style },
-        })),
+    setTheme: (
+      theme
+    ) =>
+      set({
+        theme,
+      }),
 
-      setTheme: (theme) =>
-        set((state) => ({
-          settings: { ...state.settings, theme },
-        })),
+    setLanguage: (
+      language
+    ) =>
+      set({
+        language,
+      }),
 
-      addMessage: (message) =>
-        set((state) => ({
-          recentMessages: [message, ...state.recentMessages].slice(0, 50),
-        })),
+    setSidebarOpen: (
+      value
+    ) =>
+      set({
+        sidebarOpen: value,
+      }),
 
-      clearMessages: () =>
-        set(() => ({
-          recentMessages: [],
-        })),
+    toggleSidebar: () =>
+      set((state) => ({
+        sidebarOpen:
+          !state.sidebarOpen,
+      })),
 
-      addSuggestedReplies: (replies) =>
-        set((state) => ({
-          suggestedReplies: [replies, ...state.suggestedReplies].slice(0, 20),
-        })),
+    setSearchQuery: (
+      value
+    ) =>
+      set({
+        searchQuery: value,
+      }),
 
-      addFavoriteReply: (reply) =>
-        set((state) => ({
-          favorites: [reply, ...state.favorites],
-        })),
+    reset: () =>
+      set(initialState),
+  }));
 
-      removeFavoriteReply: (replyId) =>
-        set((state) => ({
-          favorites: state.favorites.filter((r) => r.id !== replyId),
-        })),
-
-      unlockModule: (moduleId: string) =>
-        set((state) => ({
-          curriculumProgress: {
-            ...state.curriculumProgress,
-            modulesUnlocked: Array.from(new Set([...state.curriculumProgress.modulesUnlocked, moduleId])),
-          },
-        })),
-
-      markLessonComplete: (moduleId: string, lessonIndex: number, score?: number) =>
-        set((state) => {
-          const existing = state.curriculumProgress.modules[moduleId] || {
-            moduleId,
-            lessonsCompleted: 0,
-            lessonsTotal: 0,
-          } as ModuleProgress;
-
-          const updated: ModuleProgress = {
-            ...existing,
-            lessonsCompleted: Math.max(existing.lessonsCompleted, lessonIndex + 1),
-            lessonsTotal: Math.max(existing.lessonsTotal, lessonIndex + 1),
-            lastCompletedAt: Date.now(),
-            score: score ?? existing.score,
-          };
-
-          return {
-            curriculumProgress: {
-              ...state.curriculumProgress,
-              modules: {
-                ...state.curriculumProgress.modules,
-                [moduleId]: updated,
-              },
-            },
-          };
-        }),
-
-      resetCurriculumProgress: () =>
-        set(() => ({
-          curriculumProgress: {
-            modulesUnlocked: ['note-reading'],
-            modules: {},
-          },
-        })),
-    }),
-    {
-      name: 'swift-reply-store',
-      storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
-);
+export default useAppStore;

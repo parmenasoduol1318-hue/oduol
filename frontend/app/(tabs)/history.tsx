@@ -1,109 +1,209 @@
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, useColorScheme } from 'react-native';
-import { useAppStore } from 'frontend/store/appStore';
-import { getTranslation } from '../../locales/i18n';
+import React, { useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+
+import { useChatStore } from "@/store/chatStore";
+
 export default function HistoryScreen() {
-  const settings = useAppStore((state) => state.settings);
-  const recentMessages = useAppStore((state) => state.recentMessages);
+  const {
+    chats,
+    loading,
+    fetchChats,
+  } = useChatStore();
 
-  const t = getTranslation(settings.preferredLanguage as 'en' | 'sw' | 'fr' | 'ar');
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark' || settings.theme === 'dark';
+  useEffect(() => {
+    fetchChats();
+  }, []);
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
-  };
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 16,
-      backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5',
-    },
-    emptyContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-    },
-    emptyText: {
-      fontSize: 16,
-      color: isDark ? '#999' : '#666',
-      textAlign: 'center',
-    },
-    messageCard: {
-      backgroundColor: isDark ? '#2a2a2a' : '#fff',
-      padding: 12,
-      marginBottom: 8,
-      borderRadius: 8,
-      borderLeftWidth: 4,
-      borderLeftColor: '#007AFF',
-    },
-    messageContent: {
-      fontSize: 14,
-      color: isDark ? '#fff' : '#000',
-      marginBottom: 8,
-      lineHeight: 20,
-    },
-    messageDetails: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    },
-    detailBadge: {
-      flexDirection: 'row',
-      gap: 8,
-    },
-    badge: {
-      backgroundColor: '#e0e0e0',
-      paddingVertical: 2,
-      paddingHorizontal: 6,
-      borderRadius: 4,
-    },
-    badgeText: {
-      fontSize: 11,
-      color: '#333',
-      fontWeight: '600',
-    },
-    timestamp: {
-      fontSize: 11,
-      color: isDark ? '#999' : '#999',
-    },
+  const sortedChats = [...chats].sort((a: any, b: any) => {
+    return (
+      new Date(b.updated_at || b.created_at).getTime() -
+      new Date(a.updated_at || a.created_at).getTime()
+    );
   });
 
-  if (recentMessages.length === 0) {
+  if (loading) {
     return (
-      <View style={styles.container}>
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No message history yet. Start analyzing messages! 📝</Text>
-        </View>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator
+          size="large"
+          color="#2563EB"
+        />
+        <Text style={styles.loadingText}>
+          Loading history...
+        </Text>
       </View>
     );
   }
 
   return (
-    <FlatList
-      contentContainerStyle={styles.container}
-      data={recentMessages}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <View style={styles.messageCard}>
-          <Text style={styles.messageContent}>{item.content}</Text>
-          <View style={styles.messageDetails}>
-            <View style={styles.detailBadge}>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{t.tones[item.detectedTone]}</Text>
-              </View>
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{t.intents[item.detectedIntent]}</Text>
-              </View>
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        Chat History
+      </Text>
+
+      <FlatList
+        data={sortedChats}
+        keyExtractor={(item: any) =>
+          item.id.toString()
+        }
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() =>
+              router.push(`/chat/${item.id}`)
+            }
+          >
+            <View style={styles.icon}>
+              <Ionicons
+                name="time"
+                size={22}
+                color="#2563EB"
+              />
             </View>
-            <Text style={styles.timestamp}>{formatDate(item.timestamp)}</Text>
+
+            <View style={styles.content}>
+              <Text
+                style={styles.chatTitle}
+                numberOfLines={1}
+              >
+                {item.title || "Untitled Chat"}
+              </Text>
+
+              <Text
+                numberOfLines={2}
+                style={styles.preview}
+              >
+                {item.last_message ||
+                  "No messages yet"}
+              </Text>
+
+              <Text style={styles.date}>
+                {new Date(
+                  item.updated_at || item.created_at
+                ).toLocaleString()}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons
+              name="time-outline"
+              size={80}
+              color="#CBD5E1"
+            />
+
+            <Text style={styles.emptyTitle}>
+              No History
+            </Text>
+
+            <Text style={styles.emptySubtitle}>
+              Your previous conversations will
+              appear here.
+            </Text>
           </View>
-        </View>
-      )}
-      inverted
-    />
+        }
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+    paddingTop: 55,
+    paddingHorizontal: 16,
+  },
+
+  title: {
+    fontSize: 30,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 20,
+  },
+
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 12,
+    elevation: 2,
+  },
+
+  icon: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: "#DBEAFE",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  content: {
+    flex: 1,
+    marginLeft: 14,
+  },
+
+  chatTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#111827",
+  },
+
+  preview: {
+    color: "#6B7280",
+    marginTop: 5,
+    lineHeight: 20,
+  },
+
+  date: {
+    marginTop: 8,
+    fontSize: 12,
+    color: "#9CA3AF",
+  },
+
+  emptyContainer: {
+    marginTop: 90,
+    alignItems: "center",
+    paddingHorizontal: 30,
+  },
+
+  emptyTitle: {
+    marginTop: 20,
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#111827",
+  },
+
+  emptySubtitle: {
+    marginTop: 10,
+    textAlign: "center",
+    color: "#6B7280",
+    lineHeight: 22,
+    fontSize: 15,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  loadingText: {
+    marginTop: 14,
+    color: "#6B7280",
+    fontSize: 16,
+  },
+});

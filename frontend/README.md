@@ -1,294 +1,326 @@
-<<<<<<< HEAD
-# SwiftReply 💬
+# SwiftReply Frontend
 
-SwiftReply is a fast, lightweight communication assistant that helps users respond to messages with ease. Using intelligent text analysis, SwiftReply detects the tone of any message and instantly suggests clear, well-crafted replies in multiple styles.
-
-## Features
-
-### 🎯 Core Features
-- **Smart Message Intent Detection** - Identifies if messages are questions, statements, requests, warnings, flirting, joking, help requests, complaints, or compliments
-- **Tone Analysis** - Automatically detects the tone: friendly, serious, angry, formal, joking, confused, supportive, or neutral
-- **Multiple Reply Styles** - Generate replies in different styles: short, friendly, formal, funny, creative
-- **Multi-Language Support** - English, Swahili, French, Arabic with language auto-detection
-- **Favorites System** - Save and reuse your best replies
-- **Message History** - Keep track of all analyzed messages and suggestions
-- **Dark/Light Theme** - Customizable UI themes
-
-### 🚀 Advanced Features
-- **OpenAI API Integration** - Uses GPT-3.5-turbo for intelligent reply generation
-- **Local Tone Detection** - Fast keyword-based tone detection without API calls
-- **Offline Support** - Graceful fallback for offline scenarios
-- **Responsive Design** - Optimized for both iOS and Android
-
-## Tech Stack
-
-- **Framework**: React Native with Expo
-- **Language**: TypeScript
-- **State Management**: Zustand
-- **API Integration**: OpenAI SDK
-- **Routing**: Expo Router
-- **Storage**: AsyncStorage
-- **Localization**: i18n-js with custom translations
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (14 or higher)
-- npm or yarn
-- Expo CLI: `npm install -g expo-cli`
-- iOS/Android emulator or physical device
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   cd pam
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure OpenAI API Key**
-   - Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
-   - Open the app and go to Settings
-   - Paste your API key in the "OpenAI API Key" field
-   - Save settings
-
-4. **Start the development server**
-   ```bash
-   npm start
-   ```
-
-5. **Run on your device**
-   - **iOS**: Press `i` in terminal or `npm run ios`
-   - **Android**: Press `a` in terminal or `npm run android`
-   - **Web**: Press `w` in terminal or `npm run web`
-
-## Project Structure
-
-```
-app/
-├── _layout.tsx              # Root layout with Stack navigation
-├── index.tsx                # Home screen with tab navigation
-├── favorites.tsx            # Favorites screen
-├── history.tsx              # Message history screen
-├── settings.tsx             # Settings screen
-├── components/
-│   ├── HomeScreen.tsx       # Main message analysis UI
-│   └── SettingsScreen.tsx   # Settings configuration UI
-├── services/
-│   └── ReplyService.ts      # OpenAI API integration
-├── store/
-│   └── appStore.ts          # Zustand state management
-├── types/
-│   └── index.ts             # TypeScript type definitions
-├── utils/
-│   ├── toneDetector.ts      # Local tone detection
-│   └── intentDetector.ts    # Message intent detection
-└── locales/
-    ├── translations.ts      # Translation strings (EN, SW, FR, AR)
-    └── i18n.ts             # Localization helpers
-```
-
-## Usage
-
-### Analyzing a Message
-
-1. **Go to Home Tab**
-   - Paste or type a message you received
-   - Tap "Analyze" button
-
-2. **View Analysis**
-   - See detected tone and intent
-   - Review suggested replies in different styles
-
-3. **Use a Reply**
-   - Tap "Copy" to copy a reply to clipboard
-   - Tap ⭐ to save as favorite
-
-### Managing Favorites
-
-- **Favorites Tab** - View all saved replies
-- **Copy** - Share or copy to clipboard
-- **Delete** - Remove from favorites
-
-### Viewing History
-
-- **History Tab** - See all previously analyzed messages
-- **Tone & Intent Badges** - Quick view of message analysis
-- **Timestamps** - Know when you analyzed each message
-
-### Customizing Settings
-
-- **API Key** - Configure your OpenAI API key
-- **Language** - Choose from English, Swahili, French, Arabic
-- **Reply Style** - Set your preferred default reply style
-- **Theme** - Light, dark, or auto (matches system)
-
-## Configuration
-
-### Environment Variables
-
-Create a `.env` file (optional):
-```
-OPENAI_API_KEY=your_api_key_here
-```
-
-However, it's recommended to set the API key through the Settings screen in the app for security.
-
-## API Reference
-
-### ReplyService
-
-```typescript
-const service = new ReplyService(apiKey);
-
-// Analyze a message
-const analysis = await service.analyzeMessage(messageContent, language);
-// Returns: { tone: MessageTone, intent: MessageIntent }
-
-// Generate reply suggestions
-const replies = await service.generateReplies(
-  message,
-  tone,
-  intent,
-  language,
-  styles
-);
-// Returns: Reply[]
-
-// Generate reply in specific style
-const reply = await service.generateReplyInStyle(message, style, language);
-// Returns: string
-```
-
-## Supported Languages
-
-| Language | Code | Status |
-|----------|------|--------|
-| English  | en   | ✅ Full Support |
-| Swahili  | sw   | ✅ Full Support |
-| French   | fr   | ✅ Full Support |
-| Arabic   | ar   | ✅ Full Support |
-
-## Data Privacy
-
-- **Local Processing**: Tone detection runs locally without sending data
-- **API Calls**: Only message text is sent to OpenAI for reply generation
-- **Storage**: All data is stored locally on your device
-- **No Tracking**: SwiftReply doesn't track user behavior
-
-## Troubleshooting
-
-### API Key Not Working
-- Verify the key is correct at [OpenAI Platform](https://platform.openai.com/api-keys)
-- Ensure your account has available credits
-- Check network connectivity
-
-### Long Loading Times
-- Replies are typically generated in 2-5 seconds
-- Slower internet or high API usage may increase time
-- Check your OpenAI API rate limits
-
-### Language Not Detected Correctly
-- Language detection happens based on content keywords
-- You can override in Settings > Language
-- Try providing more text for better accuracy
-
-## Contributing
-
-We welcome contributions! 
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## Roadmap
-
-- [ ] Voice-to-Reply feature (speech-to-text)
-- [ ] Chat summaries for long conversations
-- [ ] Personal reply style learning
-- [ ] Custom auto-responses
-- [ ] Integration with messaging apps (WhatsApp, Messenger)
-- [ ] Safe Mode for teens with toxic message warnings
-- [ ] Lightweight offline AI models
-- [ ] More language support (Spanish, Portuguese, Italian)
-- [ ] Emoji suggestions
-- [ ] Reply templates system
-
-## Performance
-
-- **Tone Detection**: < 100ms (local)
-- **Reply Generation**: 2-5 seconds (API dependent)
-- **App Size**: ~50MB (iOS), ~45MB (Android)
-- **Min OS Support**: iOS 13+, Android 8+
-
-## License
-
-MIT License - see LICENSE file for details
-
-## Support
-
-- **Documentation**: See this README
-- **Issues**: Report bugs on GitHub Issues
-- **Discussion**: Start a Discussion for features or questions
-
-## Acknowledgments
-
-- OpenAI for GPT-3.5-turbo API
-- React Native and Expo communities
-- Contributors and testers
+SwiftReply is an AI-powered mobile application built with **React Native**, **Expo**, and **TypeScript**. It provides intelligent conversations, voice interaction, image generation, personal memory, subscriptions, and payment integration in a modern ChatGPT-style interface.
 
 ---
 
-Built with ❤️ for faster, smarter communication
-=======
-<<<<<<< HEAD
-oduol — Learn Piano & Read Music
+# Features
 
-oduol is a progressive, browser-based learning app that teaches how to read musical notation, develop rhythm and ear, and apply those skills at the piano. This repository contains a minimal, extensible starter with:
+## AI Chat
 
-- An interactive staff that shows notes
-- On-screen piano keyboard (white + optional black keys)
-- Audio playback with sample-file support and WebAudio oscillator fallback
-- Levels, scoring and simple lessons
-- Responsive layout for mobile and desktop
+- Multiple conversations
+- Chat history
+- Streaming responses
+- Markdown support
+- Code highlighting
+- Conversation search
+- Rename chats
+- Delete chats
 
-Files
-- [index.html](index.html)
-- [styles.css](styles.css)
-- [app.js](app.js)
-- [CURRICULUM.md](CURRICULUM.md)
+---
 
-Run locally (Python 3 simple server)
+## Authentication
 
-```powershell
-cd "c:\Users\rogol\New folder"
-python -m http.server 8000
-# then open http://localhost:8000 in your browser
+- Register
+- Login
+- Logout
+- Refresh tokens
+- Forgot password
+- Reset password
+- Change password
+- Profile management
+
+---
+
+## Voice AI
+
+- Voice recording
+- Speech-to-text
+- Text-to-speech
+- AI voice conversations
+- Voice call interface
+- Audio playback
+- Waveform animations
+
+---
+
+## AI Images
+
+- Image generation
+- Image history
+- Image preview
+- Upload images
+- Download images
+- Share images
+
+---
+
+## Memory
+
+Personal AI memory system.
+
+Supports:
+
+- Save memories
+- Edit memories
+- Delete memories
+- Search memories
+- Memory statistics
+- Memory settings
+
+---
+
+## Subscription
+
+Supports Free and Pro plans.
+
+Pro unlocks:
+
+- Unlimited chats
+- Faster AI responses
+- Voice conversations
+- Image generation
+- Premium features
+
+---
+
+## Payments
+
+### M-Pesa
+
+- STK Push
+- Payment verification
+- Subscription activation
+
+### PayPal
+
+- Checkout
+- Subscription purchase
+- Payment history
+
+---
+
+## Settings
+
+- Account
+- Privacy
+- Notifications
+- Appearance
+- Language
+- About
+
+---
+
+# Technologies
+
+- React Native
+- Expo
+- TypeScript
+- React Navigation
+- Expo Router (optional)
+- Axios
+- AsyncStorage
+- Expo Secure Store
+- Expo Audio
+- Expo Image Picker
+
+---
+
+# Project Structure
+
+```text
+frontend/
+│
+├── api/
+├── assets/
+├── components/
+├── constants/
+├── contexts/
+├── hooks/
+├── navigation/
+├── screens/
+├── services/
+├── store/
+├── types/
+├── utils/
+│
+├── App.tsx
+├── app.json
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
 
-Adding piano samples
-- Create a `samples/` folder next to `index.html` and add MP3/OGG files named by note, e.g. `C4.mp3`, `C#4.mp3`, `D4.mp3`.
-- The app will try to load `samples/<NOTE>.mp3` and use samples when available; otherwise it uses a generated tone.
+---
 
-Curriculum & features
-- See `CURRICULUM.md` for the full syllabus the app aims to cover. The document lists modules (note reading, rhythm/metronome, scales, chords, ear training, sight-reading, technique, repertoire, practice scheduling and assessments).
+# Components
 
-Next steps you can ask me to implement
-- Add real piano sample files or a downloader for free sample packs
-- Implement a metronome + rhythm exercises
-- Add MIDI input, recording and playback
-- Persist progress to `localStorage` and add user profiles
-- Add lesson progression, quizzes and graded assessments
+The application is organized into reusable components.
 
-If you want, I can start by adding the metronome and rhythm lessons or include a small set of sample audio files into `samples/`.
-=======
-# oduol
->>>>>>> 294795e795aac5a349cb6209e705bf305ddb5d3a
->>>>>>> 0f99b8091cda0a6cdbea16281ad6f5f31d5f1df1
+Examples include:
+
+- Common UI
+- Forms
+- Images
+- Memory
+- Settings
+- Sidebar
+- Voice
+- UI utilities
+
+---
+
+# State Management
+
+Shared state is managed using React Context and custom hooks.
+
+Examples:
+
+- Authentication
+- Theme
+- Chat
+- Subscription
+- Voice
+- Memory
+
+---
+
+# API Communication
+
+The frontend communicates with the backend through REST APIs.
+
+Typical endpoints include:
+
+```http
+POST /api/auth/login
+POST /api/auth/register
+GET  /api/users/me
+
+GET  /api/chat/history
+POST /api/chat/send
+
+POST /api/images/generate
+
+POST /api/payments/mpesa/stkpush
+POST /api/payments/mpesa/callback
+
+POST /api/payments/paypal/create-order
+
+GET  /api/memory
+POST /api/memory
+
+POST /api/voice/transcribe
+POST /api/voice/chat
+```
+
+---
+
+# Installation
+
+Clone the repository.
+
+```bash
+git clone <repository-url>
+```
+
+Install dependencies.
+
+```bash
+npm install
+```
+
+Start the development server.
+
+```bash
+npx expo start
+```
+
+Run on Android.
+
+```bash
+npx expo run:android
+```
+
+Run on iOS.
+
+```bash
+npx expo run:ios
+```
+
+Run on the web.
+
+```bash
+npx expo start --web
+```
+
+---
+
+# Environment Variables
+
+Create a `.env` file.
+
+Example:
+
+```env
+EXPO_PUBLIC_API_URL=https://your-backend-url.com
+
+EXPO_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_client_id
+
+EXPO_PUBLIC_APP_NAME=SwiftReply
+```
+
+---
+
+# Design Goals
+
+SwiftReply focuses on:
+
+- Fast performance
+- Beautiful UI
+- Modular architecture
+- Offline-friendly behavior
+- Accessibility
+- Responsive layouts
+- Scalable codebase
+- Clean developer experience
+
+---
+
+# Future Roadmap
+
+Planned improvements include:
+
+- AI agent workflows
+- Multi-modal conversations
+- Live streaming responses
+- Team workspaces
+- Shared chats
+- Voice interruption (barge-in)
+- Offline AI features
+- Plugin support
+- Cloud synchronization
+- Desktop application
+- Tablet-optimized layouts
+- Wearable device integration
+
+---
+
+# Backend
+
+The frontend connects to a FastAPI backend that provides:
+
+- Authentication
+- AI chat
+- Image generation
+- Voice services
+- Memory
+- M-Pesa integration
+- PayPal integration
+- User management
+- Subscription management
+
+---
+
+# License
+
+This project is intended for the SwiftReply platform. Refer to the project's license for usage and distribution terms.

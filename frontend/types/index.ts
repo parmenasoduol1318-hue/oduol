@@ -1,74 +1,193 @@
-export type MessageTone =
-  | 'friendly'
-  | 'serious'
-  | 'angry'
-  | 'formal'
-  | 'joking'
-  | 'confused'
-  | 'supportive'
-  | 'neutral';
+// frontend/types/index.ts
 
-export type ReplyStyle = 'short' | 'formal' | 'funny' | 'friendly' | 'creative';
+/* ======================================================
+   Authentication
+====================================================== */
 
-export type MessageIntent =
-  | 'question'
-  | 'statement'
-  | 'request'
-  | 'warning'
-  | 'flirting'
-  | 'joking'
-  | 'help_request'
-  | 'complaint'
-  | 'compliment';
+export * from "./auth";
 
-export interface Message {
-  id: string;
-  content: string;
-  detectedTone: MessageTone;
-  detectedIntent: MessageIntent;
-  language: string;
-  timestamp: number;
+/* ======================================================
+   Users
+====================================================== */
+
+export * from "./user";
+
+/* ======================================================
+   Chat
+====================================================== */
+
+export * from "./chat";
+
+/* ======================================================
+   Messages
+====================================================== */
+
+export * from "./message";
+
+/* ======================================================
+   Memory
+====================================================== */
+
+export * from "./memory";
+
+/* ======================================================
+   Images
+====================================================== */
+
+export * from "./image";
+
+/* ======================================================
+   Voice
+====================================================== */
+
+export * from "./voice";
+
+/* ======================================================
+   Payments
+====================================================== */
+
+export * from "./payment";
+
+/* ======================================================
+   Subscription
+====================================================== */
+
+export * from "./subscription";
+
+/* ======================================================
+   Settings
+====================================================== */
+
+export * from "./settings";
+
+/* ======================================================
+   Notifications
+====================================================== */
+
+export * from "./notification";
+
+/* ======================================================
+   API
+====================================================== */
+
+export * from "./api";
+
+/* ======================================================
+   Navigation
+====================================================== */
+
+export * from "./navigation";
+
+/* ======================================================
+   Generic Utility Types
+====================================================== */
+
+export type Nullable<T> = T | null;
+
+export type Optional<T> = T | undefined;
+
+export type ID = string;
+
+export type ISODateString = string;
+
+/* ======================================================
+   Common API Response
+====================================================== */
+
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  message: string;
+  data: T;
 }
 
-export interface Reply {
-  id: string;
-  content: string;
-  style: ReplyStyle;
-  tone: MessageTone;
-  confidence: number;
+/* ======================================================
+   Pagination
+====================================================== */
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
-export interface SuggestedReplies {
-  messageId: string;
-  replies: Reply[];
-  generatedAt: number;
+export interface PaginatedResponse<T> {
+  items: T[];
+  pagination: Pagination;
 }
 
-export interface AppSettings {
-  openaiApiKey: string;
-  preferredLanguage: string;
-  preferredReplyStyle: ReplyStyle;
-  enableOfflineMode: boolean;
-  theme: 'light' | 'dark' | 'auto';
-  autoDetectTone: boolean;
+/* ======================================================
+   Loading State
+====================================================== */
+
+export interface LoadingState {
+  loading: boolean;
+  error: string | null;
 }
 
-export interface CachedReply {
-  messageContent: string;
-  replies: Reply[];
-  cachedAt: number;
+/* ======================================================
+   Theme
+====================================================== */
+
+export type ThemeMode =
+  | "light"
+  | "dark"
+  | "system";
+
+/* ======================================================
+   Languages
+====================================================== */
+
+export type AppLanguage =
+  | "en"
+  | "sw";
+
+/* ======================================================
+   User Roles
+====================================================== */
+
+export type UserRole =
+  | "user"
+  | "admin";
+
+/* ======================================================
+   Subscription Plans
+====================================================== */
+
+export type SubscriptionPlan =
+  | "FREE"
+  | "PRO";
+
+/* ======================================================
+   Payment Providers
+====================================================== */
+
+export type PaymentProvider =
+  | "MPESA"
+  | "PAYPAL";
+
+/* ======================================================
+   Network Status
+====================================================== */
+
+export type NetworkStatus =
+  | "online"
+  | "offline";
+
+/* ======================================================
+   Generic Select Option
+====================================================== */
+
+export interface SelectOption {
+  label: string;
+  value: string;
 }
 
-// Curriculum progress types
-export interface ModuleProgress {
-  moduleId: string;
-  lessonsCompleted: number;
-  lessonsTotal: number;
-  lastCompletedAt?: number;
-  score?: number; // optional aggregate score or percent
-}
+/* ======================================================
+   Generic Key/Value
+====================================================== */
 
-export interface CurriculumProgress {
-  modulesUnlocked: string[];
-  modules: Record<string, ModuleProgress>;
+export interface KeyValue<T = string> {
+  key: string;
+  value: T;
 }

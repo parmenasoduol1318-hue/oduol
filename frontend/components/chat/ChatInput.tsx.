@@ -1,0 +1,147 @@
+// components/chat/ChatInput.tsx
+
+import React, { useState } from "react";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
+interface ChatInputProps {
+  onSend: (message: string) => void;
+  onVoice?: () => void;
+  onImage?: () => void;
+  loading?: boolean;
+  placeholder?: string;
+}
+
+export default function ChatInput({
+  onSend,
+  onVoice,
+  onImage,
+  loading = false,
+  placeholder = "Message SwiftReply...",
+}: ChatInputProps) {
+  const [message, setMessage] = useState("");
+
+  const handleSend = () => {
+    const text = message.trim();
+
+    if (!text || loading) return;
+
+    onSend(text);
+    setMessage("");
+  };
+
+  return (
+    <View style={styles.wrapper}>
+      <View style={styles.container}>
+        {/* Image Upload */}
+        <TouchableOpacity
+          onPress={onImage}
+          style={styles.iconButton}
+        >
+          <Ionicons
+            name="image-outline"
+            size={24}
+            color="#2563EB"
+          />
+        </TouchableOpacity>
+
+        {/* Input */}
+        <TextInput
+          style={styles.input}
+          value={message}
+          onChangeText={setMessage}
+          placeholder={placeholder}
+          placeholderTextColor="#9CA3AF"
+          multiline
+          maxLength={5000}
+          editable={!loading}
+        />
+
+        {/* Voice */}
+        <TouchableOpacity
+          onPress={onVoice}
+          style={styles.iconButton}
+        >
+          <Ionicons
+            name="mic-outline"
+            size={24}
+            color="#2563EB"
+          />
+        </TouchableOpacity>
+
+        {/* Send */}
+        <TouchableOpacity
+          onPress={handleSend}
+          disabled={loading}
+          style={styles.sendButton}
+        >
+          {loading ? (
+            <ActivityIndicator
+              color="#FFFFFF"
+              size="small"
+            />
+          ) : (
+            <Ionicons
+              name="send"
+              size={20}
+              color="#FFFFFF"
+            />
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrapper: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: "#FFFFFF",
+    borderTopWidth: 1,
+    borderTopColor: "#E5E7EB",
+  },
+
+  container: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    backgroundColor: "#F3F4F6",
+    borderRadius: 28,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+
+  input: {
+    flex: 1,
+    maxHeight: 120,
+    minHeight: 42,
+    fontSize: 16,
+    color: "#111827",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  sendButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#2563EB",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 6,
+  },
+});

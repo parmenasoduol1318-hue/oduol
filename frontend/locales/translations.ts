@@ -1,299 +1,322 @@
-export const en = {
-  app: {
-    name: 'SwiftReply',
-    tagline: 'Smart replies, instantly',
+// frontend/locales/translations.ts
+
+export type SupportedLanguage =
+  | "en"
+  | "sw";
+
+export type TranslationDictionary = Record<
+  string,
+  string
+>;
+
+export const translations: Record<
+  SupportedLanguage,
+  TranslationDictionary
+> = {
+  /* ======================================================
+     English
+  ====================================================== */
+
+  en: {
+    app_name: "SwiftReply",
+
+    welcome: "Welcome",
+    hello: "Hello",
+
+    login: "Login",
+    logout: "Logout",
+    register: "Register",
+
+    email: "Email",
+    password: "Password",
+    confirm_password: "Confirm Password",
+
+    continue: "Continue",
+    cancel: "Cancel",
+    save: "Save",
+    delete: "Delete",
+    edit: "Edit",
+    retry: "Retry",
+
+    loading: "Loading...",
+    searching: "Searching...",
+    generating: "Generating...",
+
+    send: "Send",
+
+    new_chat: "New Chat",
+
+    chats: "Chats",
+
+    history: "History",
+
+    memory: "Memory",
+
+    settings: "Settings",
+
+    profile: "Profile",
+
+    notifications: "Notifications",
+
+    appearance: "Appearance",
+
+    language: "Language",
+
+    privacy: "Privacy",
+
+    account: "Account",
+
+    about: "About",
+
+    dark_mode: "Dark Mode",
+
+    light_mode: "Light Mode",
+
+    system_theme: "System",
+
+    voice: "Voice",
+
+    image_generation:
+      "Image Generation",
+
+    upload_image:
+      "Upload Image",
+
+    take_photo:
+      "Take Photo",
+
+    microphone:
+      "Microphone",
+
+    recording:
+      "Recording...",
+
+    stop_recording:
+      "Stop Recording",
+
+    subscription:
+      "Subscription",
+
+    upgrade_to_pro:
+      "Upgrade to Pro",
+
+    free_plan:
+      "Free Plan",
+
+    pro_plan:
+      "Pro Plan",
+
+    mpesa:
+      "M-Pesa",
+
+    paypal:
+      "PayPal",
+
+    payment:
+      "Payment",
+
+    success:
+      "Success",
+
+    failed:
+      "Failed",
+
+    error:
+      "Error",
+
+    no_internet:
+      "No internet connection.",
+
+    try_again:
+      "Try Again",
+
+    offline:
+      "Offline",
+
+    online:
+      "Online",
   },
-  home: {
-    title: 'Write a Message',
-    placeholder: 'Paste a message to get smart replies...',
-    analyze: 'Analyze',
-    analyzing: 'Analyzing...',
-    tone: 'Tone Detected',
-    intent: 'Intent',
-    replies: 'Suggested Replies',
-    copy: 'Copy',
-    copySuccess: 'Copied to clipboard!',
-    addFavorite: 'Add to favorites',
-  },
-  settings: {
-    title: 'Settings',
-    apiKey: 'OpenAI API Key',
-    apiKeyPlaceholder: 'Enter your API key',
-    language: 'Language',
-    replyStyle: 'Preferred Reply Style',
-    theme: 'Theme',
-    offlineMode: 'Offline Mode',
-    save: 'Save Settings',
-    saved: 'Settings saved!',
-  },
-  languages: {
-    en: 'English',
-    sw: 'Swahili',
-    fr: 'French',
-    ar: 'Arabic',
-  },
-  replyStyles: {
-    short: 'Short',
-    friendly: 'Friendly',
-    formal: 'Formal',
-    funny: 'Funny',
-    creative: 'Creative',
-  },
-  themes: {
-    light: 'Light',
-    dark: 'Dark',
-    auto: 'Auto',
-  },
-  tones: {
-    friendly: 'Friendly',
-    serious: 'Serious',
-    angry: 'Angry',
-    formal: 'Formal',
-    joking: 'Joking',
-    confused: 'Confused',
-    supportive: 'Supportive',
-    neutral: 'Neutral',
-  },
-  intents: {
-    question: 'Question',
-    statement: 'Statement',
-    request: 'Request',
-    warning: 'Warning',
-    flirting: 'Flirting',
-    joking: 'Joking',
-    help_request: 'Help Request',
-    complaint: 'Complaint',
-    compliment: 'Compliment',
-  },
-  navigation: {
-    home: 'Home',
-    favorites: 'Favorites',
-    history: 'History',
-    settings: 'Settings',
+
+  /* ======================================================
+     Kiswahili
+  ====================================================== */
+
+  sw: {
+    app_name: "SwiftReply",
+
+    welcome: "Karibu",
+
+    hello: "Habari",
+
+    login: "Ingia",
+
+    logout: "Toka",
+
+    register:
+      "Jisajili",
+
+    email:
+      "Barua pepe",
+
+    password:
+      "Nenosiri",
+
+    confirm_password:
+      "Thibitisha Nenosiri",
+
+    continue:
+      "Endelea",
+
+    cancel:
+      "Ghairi",
+
+    save:
+      "Hifadhi",
+
+    delete:
+      "Futa",
+
+    edit:
+      "Hariri",
+
+    retry:
+      "Jaribu tena",
+
+    loading:
+      "Inapakia...",
+
+    searching:
+      "Inatafuta...",
+
+    generating:
+      "Inazalisha...",
+
+    send:
+      "Tuma",
+
+    new_chat:
+      "Mazungumzo Mapya",
+
+    chats:
+      "Mazungumzo",
+
+    history:
+      "Historia",
+
+    memory:
+      "Kumbukumbu",
+
+    settings:
+      "Mipangilio",
+
+    profile:
+      "Wasifu",
+
+    notifications:
+      "Arifa",
+
+    appearance:
+      "Mwonekano",
+
+    language:
+      "Lugha",
+
+    privacy:
+      "Faragha",
+
+    account:
+      "Akaunti",
+
+    about:
+      "Kuhusu",
+
+    dark_mode:
+      "Mandhari Meusi",
+
+    light_mode:
+      "Mandhari Meupe",
+
+    system_theme:
+      "Mfumo",
+
+    voice:
+      "Sauti",
+
+    image_generation:
+      "Uundaji wa Picha",
+
+    upload_image:
+      "Pakia Picha",
+
+    take_photo:
+      "Piga Picha",
+
+    microphone:
+      "Maikrofoni",
+
+    recording:
+      "Inarekodi...",
+
+    stop_recording:
+      "Simamisha Kurekodi",
+
+    subscription:
+      "Usajili",
+
+    upgrade_to_pro:
+      "Pata Pro",
+
+    free_plan:
+      "Mpango wa Bure",
+
+    pro_plan:
+      "Mpango wa Pro",
+
+    mpesa:
+      "M-Pesa",
+
+    paypal:
+      "PayPal",
+
+    payment:
+      "Malipo",
+
+    success:
+      "Imefanikiwa",
+
+    failed:
+      "Imeshindikana",
+
+    error:
+      "Hitilafu",
+
+    no_internet:
+      "Hakuna muunganisho wa intaneti.",
+
+    try_again:
+      "Jaribu Tena",
+
+    offline:
+      "Nje ya Mtandao",
+
+    online:
+      "Mtandaoni",
   },
 };
 
-export const sw = {
-  app: {
-    name: 'SwiftReply',
-    tagline: 'Majibu mara moja',
-  },
-  home: {
-    title: 'Andika Ujumbe',
-    placeholder: 'Bandika ujumbe kupata majibu maalum...',
-    analyze: 'Changanua',
-    analyzing: 'Inachaghanua...',
-    tone: 'Sauti Iliyotambuliwa',
-    intent: 'Kasubu',
-    replies: 'Majibu Yaliyopendekezwa',
-    copy: 'Nakili',
-    copySuccess: 'Kunakiliwa!',
-    addFavorite: 'Ongeza kwa Favorites',
-  },
-  settings: {
-    title: 'Mipangilio',
-    apiKey: 'OpenAI API Key',
-    apiKeyPlaceholder: 'Ingiza API key',
-    language: 'Lugha',
-    replyStyle: 'Mtindo wa Majibu',
-    theme: 'Mandhari',
-    offlineMode: 'Mtindo wa Mkondoni',
-    save: 'Hifadhi Mipangilio',
-    saved: 'Mipangilio Imehifadhiwa!',
-  },
-  languages: {
-    en: 'Kiingereza',
-    sw: 'Kiswahili',
-    fr: 'Kifaransa',
-    ar: 'Kiarabu',
-  },
-  replyStyles: {
-    short: 'Fupi',
-    friendly: 'Rafiki',
-    formal: 'Rasmi',
-    funny: 'Ajabu',
-    creative: 'Kujifanya',
-  },
-  themes: {
-    light: 'Angavu',
-    dark: 'Giza',
-    auto: 'Otomatiki',
-  },
-  tones: {
-    friendly: 'Rafiki',
-    serious: 'Kubwa',
-    angry: 'Kasirika',
-    formal: 'Rasmi',
-    joking: 'Kuchekeana',
-    confused: 'Kuchanganyikiwa',
-    supportive: 'Msaada',
-    neutral: 'Hakuna Maafikiano',
-  },
-  intents: {
-    question: 'Swali',
-    statement: 'Kauli',
-    request: 'Ombi',
-    warning: 'Onyo',
-    flirting: 'Upenzi',
-    joking: 'Karata',
-    help_request: 'Ombi la Msaada',
-    complaint: 'Malalamiko',
-    compliment: 'Sifa',
-  },
-  navigation: {
-    home: 'Nyumbani',
-    favorites: 'Favorites',
-    history: 'Historia',
-    settings: 'Mipangilio',
-  },
-};
+/* ======================================================
+   Translation Helper
+====================================================== */
 
-export const fr = {
-  app: {
-    name: 'SwiftReply',
-    tagline: 'Réponses intelligentes, instantanées',
-  },
-  home: {
-    title: 'Écrire un Message',
-    placeholder: 'Collez un message pour obtenir des réponses intelligentes...',
-    analyze: 'Analyser',
-    analyzing: 'Analyse en cours...',
-    tone: 'Ton Détecté',
-    intent: 'Intention',
-    replies: 'Réponses Suggérées',
-    copy: 'Copier',
-    copySuccess: 'Copié!',
-    addFavorite: 'Ajouter aux favoris',
-  },
-  settings: {
-    title: 'Paramètres',
-    apiKey: 'Clé API OpenAI',
-    apiKeyPlaceholder: 'Entrez votre clé API',
-    language: 'Langue',
-    replyStyle: 'Style de Réponse',
-    theme: 'Thème',
-    offlineMode: 'Mode Hors Ligne',
-    save: 'Enregistrer les Paramètres',
-    saved: 'Paramètres enregistrés!',
-  },
-  languages: {
-    en: 'Anglais',
-    sw: 'Swahili',
-    fr: 'Français',
-    ar: 'Arabe',
-  },
-  replyStyles: {
-    short: 'Court',
-    friendly: 'Amical',
-    formal: 'Formel',
-    funny: 'Drôle',
-    creative: 'Créatif',
-  },
-  themes: {
-    light: 'Clair',
-    dark: 'Sombre',
-    auto: 'Auto',
-  },
-  tones: {
-    friendly: 'Amical',
-    serious: 'Sérieux',
-    angry: 'Fâché',
-    formal: 'Formel',
-    joking: 'Blagueur',
-    confused: 'Confus',
-    supportive: 'Soutenant',
-    neutral: 'Neutre',
-  },
-  intents: {
-    question: 'Question',
-    statement: 'Déclaration',
-    request: 'Demande',
-    warning: 'Avertissement',
-    flirting: 'Flirt',
-    joking: 'Blague',
-    help_request: 'Demande d\'Aide',
-    complaint: 'Plainte',
-    compliment: 'Compliment',
-  },
-  navigation: {
-    home: 'Accueil',
-    favorites: 'Favoris',
-    history: 'Historique',
-    settings: 'Paramètres',
-  },
-};
+export function t(
+  language: SupportedLanguage,
+  key: string
+): string {
+  return (
+    translations[language]?.[key] ??
+    translations.en[key] ??
+    key
+  );
+}
 
-export const ar = {
-  app: {
-    name: 'SwiftReply',
-    tagline: 'ردود ذكية، على الفور',
-  },
-  home: {
-    title: 'اكتب رسالة',
-    placeholder: 'الصق رسالة للحصول على ردود ذكية...',
-    analyze: 'تحليل',
-    analyzing: 'جاري التحليل...',
-    tone: 'النبرة المكتشفة',
-    intent: 'النية',
-    replies: 'الردود المقترحة',
-    copy: 'نسخ',
-    copySuccess: 'تم النسخ!',
-    addFavorite: 'إضافة إلى المفضلة',
-  },
-  settings: {
-    title: 'الإعدادات',
-    apiKey: 'مفتاح API OpenAI',
-    apiKeyPlaceholder: 'أدخل مفتاح API',
-    language: 'اللغة',
-    replyStyle: 'نمط الرد',
-    theme: 'المظهر',
-    offlineMode: 'الوضع غير متصل',
-    save: 'حفظ الإعدادات',
-    saved: 'تم حفظ الإعدادات!',
-  },
-  languages: {
-    en: 'الإنجليزية',
-    sw: 'السواحيلية',
-    fr: 'الفرنسية',
-    ar: 'العربية',
-  },
-  replyStyles: {
-    short: 'قصير',
-    friendly: 'ودود',
-    formal: 'رسمي',
-    funny: 'فكاهي',
-    creative: 'إبداعي',
-  },
-  themes: {
-    light: 'فاتح',
-    dark: 'غامق',
-    auto: 'تلقائي',
-  },
-  tones: {
-    friendly: 'ودود',
-    serious: 'جدي',
-    angry: 'غاضب',
-    formal: 'رسمي',
-    joking: 'طريف',
-    confused: 'محتار',
-    supportive: 'داعم',
-    neutral: 'محايد',
-  },
-  intents: {
-    question: 'سؤال',
-    statement: 'بيان',
-    request: 'طلب',
-    warning: 'تحذير',
-    flirting: 'غزل',
-    joking: 'نكتة',
-    help_request: 'طلب مساعدة',
-    complaint: 'شكوى',
-    compliment: 'إطراء',
-  },
-  navigation: {
-    home: 'الرئيسية',
-    favorites: 'المفضلة',
-    history: 'السجل',
-    settings: 'الإعدادات',
-  },
-};
+export default translations;

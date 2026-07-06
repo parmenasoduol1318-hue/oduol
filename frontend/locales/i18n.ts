@@ -1,26 +1,83 @@
-import { en, sw, fr, ar } from './translations';
+// frontend/locales/i18n.ts
 
-export type Language = 'en' | 'sw' | 'fr' | 'ar';
+import { useSettingsStore } from "../store/settingsStore";
+import {
+  SupportedLanguage,
+  t as translate,
+} from "./translations";
 
-const translations = { en, sw, fr, ar };
+export {
+  translations,
+} from "./translations";
 
-export function getTranslation(language: Language) {
-  return translations[language] || translations['en'];
+/* ======================================================
+   Get Current Language
+====================================================== */
+
+export function getCurrentLanguage(): SupportedLanguage {
+  const language =
+    useSettingsStore.getState().language;
+
+  return language as SupportedLanguage;
 }
 
-export function getLanguageName(language: Language): string {
-  const names: Record<Language, string> = {
-    en: 'English',
-    sw: 'Swahili',
-    fr: 'Français',
-    ar: 'العربية',
-  };
-  return names[language] || 'English';
+/* ======================================================
+   Translate
+====================================================== */
+
+export function t(
+  key: string
+): string {
+  const language =
+    getCurrentLanguage();
+
+  return translate(
+    language,
+    key
+  );
 }
 
-export function getLanguageDirection(language: Language): 'ltr' | 'rtl' {
-  if (language === 'ar') {
-    return 'rtl';
-  }
-  return 'ltr';
+/* ======================================================
+   Translate With Variables
+====================================================== */
+
+export function tf(
+  key: string,
+  variables: Record<
+    string,
+    string | number
+  >
+): string {
+  let text = t(key);
+
+  Object.entries(
+    variables
+  ).forEach(
+    ([variable, value]) => {
+      text = text.replace(
+        new RegExp(
+          `\\{${variable}\\}`,
+          "g"
+        ),
+        String(value)
+      );
+    }
+  );
+
+  return text;
 }
+
+/* ======================================================
+   Utility
+====================================================== */
+
+export function isRTL(): boolean {
+  return false;
+}
+
+export default {
+  t,
+  tf,
+  getCurrentLanguage,
+  isRTL,
+};
