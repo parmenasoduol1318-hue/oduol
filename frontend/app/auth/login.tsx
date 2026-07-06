@@ -14,9 +14,10 @@ import {
 import { Link, Stack, router } from "expo-router";
 
 import { useAuthStore } from "../../store/authStore";
+import { authService } from "../../services/auth/authService";
 
 export default function LoginScreen() {
-  const login = useAuthStore((state) => state.login);
+  const storeLogin = useAuthStore((state) => state.login);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,20 +25,41 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Missing Information", "Please enter your email and password.");
+      Alert.alert(
+        "Missing Information",
+        "Please enter your email and password."
+      );
       return;
     }
 
     try {
       setLoading(true);
 
-      await login(email.trim(), password);
+      const response = await authService.login({
+        email: email.trim(),
+        password,
+      });
+
+      storeLogin(
+        {
+          id: String(response.user.id),
+          name: response.user.full_name,
+          email: response.user.email,
+          avatar: null,
+          isPro: false,
+          createdAt: response.user.created_at,
+        },
+        response.access_token,
+        response.refresh_token
+      );
 
       router.replace("/(tabs)");
     } catch (error: any) {
       Alert.alert(
         "Login Failed",
-        error?.message || "Invalid email or password."
+        error?.response?.data?.detail ||
+          error?.message ||
+          "Invalid email or password."
       );
     } finally {
       setLoading(false);
@@ -46,7 +68,7 @@ export default function LoginScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: "Login", headerShown: false }} />
+      <Stack.Screen options={{ headerShown: false }} />
 
       <KeyboardAvoidingView
         style={styles.container}
@@ -65,22 +87,21 @@ export default function LoginScreen() {
           </Text>
 
           <TextInput
+            style={styles.input}
             placeholder="Email Address"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
             value={email}
             onChangeText={setEmail}
-            style={styles.input}
           />
 
           <TextInput
+            style={styles.input}
             placeholder="Password"
             secureTextEntry
-            autoCapitalize="none"
             value={password}
             onChangeText={setPassword}
-            style={styles.input}
           />
 
           <Link href="/auth/forgot-password" asChild>
@@ -102,7 +123,9 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+            <Text style={styles.footerText}>
+              Don't have an account?
+            </Text>
 
             <Link href="/auth/register" asChild>
               <TouchableOpacity>

@@ -1,43 +1,101 @@
-import secureStorage from "../storage/secureStorage";
+import api from "../api/client";
+import API_ENDPOINTS from "../api/endpoints";
+import { tokenService } from "./tokenService";
 
 /**
  * ==========================================================
- * SwiftReply Token Service
- * ==========================================================
- *
- * Responsible for:
- * - Access Token
- * - Refresh Token
- * - User ID
- * - Authentication state
- *
- * Every authentication request in the app should use
- * this service instead of interacting with Secure Storage
- * directly.
+ * Authentication Types
  * ==========================================================
  */
 
-const ACCESS_TOKEN_KEY = "access_token";
-const REFRESH_TOKEN_KEY = "refresh_token";
-const USER_ID_KEY = "user_id";
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
 
-class TokenService {
+export interface RegisterRequest {
+  full_name: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  user: {
+    id: number;
+    full_name: string;
+    email: string;
+    is_active: boolean;
+    is_verified: boolean;
+    created_at?: string;
+  };
+}
+
+/**
+ * ==========================================================
+ * Authentication Service
+ * ==========================================================
+ */
+
+class AuthService {
   /**
    * ==========================================================
-   * Access Token
+   * Register
    * ==========================================================
    */
 
-  async setAccessToken(token: string): Promise<void> {
-    await secureStorage.set(ACCESS_TOKEN_KEY, token);
+  async register(payload: RegisterRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>(
+      API_ENDPOINTS.AUTH.REGISTER,
+      payload
+    );
+
+    await tokenService.saveSession(
+      response.access_token,
+      response.refresh_token,
+      response.user.id
+    );
+
+    return response;
   }
 
-  async getAccessToken(): Promise<string | null> {
-    return await secureStorage.get(ACCESS_TOKEN_KEY);
+  /**
+   * ==========================================================
+   * Login
+   * ==========================================================
+   */
+
+  async login(payload: LoginRequest): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>(
+      API_ENDPOINTS.AUTH.LOGIN,
+      payload
+    );
+
+    await tokenService.saveSession(
+      response.access_token,
+      response.refresh_token,
+      response.user.id
+    );
+
+    return response;
   }
 
-  async removeAccessToken(): Promise<void> {
-    await secureStorage.remove(ACCESS_TOKEN_KEY);
+  /**
+   * ==========================================================
+   * Logout
+   * ==========================================================
+   */
+
+  async logout(): Promise<void> {
+    try {
+      await api.post(API_ENDPOINTS.AUTH.LOGOUT);
+    } catch (error) {
+      // Ignore backend logout failures.
+    }
+
+    await tokenService.clearTokens();
   }
 
   /**
@@ -46,117 +104,63 @@ class TokenService {
    * ==========================================================
    */
 
-  async setRefreshToken(token: string): Promise<void> {
-    await secureStorage.set(REFRESH_TOKEN_KEY, token);
-  }
+  async refreshToken(): Promise<string | null> {
+    const refreshToken = await tokenService.getRefreshToken();
 
-  async getRefreshToken(): Promise<string | null> {
-    return await secureStorage.get(REFRESH_TOKEN_KEY);
-  }
-
-  async removeRefreshToken(): Promise<void> {
-    await secureStorage.remove(REFRESH_TOKEN_KEY);
-  }
-
-  /**
-   * ==========================================================
-   * User ID
-   * ==========================================================
-   */
-
-  async setUserId(userId: number | string): Promise<void> {
-    await secureStorage.set(USER_ID_KEY, String(userId));
-  }
-
-  async getUserId(): Promise<number | null> {
-    const value = await secureStorage.get(USER_ID_KEY);
-
-    if (!value) {
+    if (!refreshToken) {
       return null;
     }
 
-    return Number(value);
-  }
+    const response = await api.post<{
+      access_token: string;
+      refresh_token?: string;
+    }>(
+      API_ENDPOINTS.AUTH.REFRESH,
+      {
+        refresh_token: refreshToken,
+      }
+    );
 
-  async removeUserId(): Promise<void> {
-    await secureStorage.remove(USER_ID_KEY);
+    await tokenService.setAccessToken(response.access_token);
+
+    if (response.refresh_token) {
+      await tokenService.setRefreshToken(response.refresh_token);
+    }
+
+    return response.access_token;
   }
 
   /**
    * ==========================================================
-   * Save Login Session
+   * Current User
    * ==========================================================
    */
 
-  async saveSession(
-    accessToken: string,
-    refreshToken: string,
-    userId: number | string
-  ): Promise<void> {
-    await Promise.all([
-      this.setAccessToken(accessToken),
-      this.setRefreshToken(refreshToken),
-      this.setUserId(userId),
-    ]);
+  async getCurrentUser() {
+    return api.get(API_ENDPOINTS.AUTH.ME);
   }
 
   /**
    * ==========================================================
-   * Clear Session
-   * ==========================================================
-   */
-
-  async clearTokens(): Promise<void> {
-    await Promise.all([
-      this.removeAccessToken(),
-      this.removeRefreshToken(),
-      this.removeUserId(),
-    ]);
-  }
-
-  /**
-   * ==========================================================
-   * Alias
-   * ==========================================================
-   */
-
-  async logout(): Promise<void> {
-    await this.clearTokens();
-  }
-
-  /**
-   * ==========================================================
-   * Authentication
+   * Authentication Status
    * ==========================================================
    */
 
   async isAuthenticated(): Promise<boolean> {
-    const token = await this.getAccessToken();
-
-    return token !== null && token.length > 0;
+    return tokenService.isAuthenticated();
   }
 
   /**
    * ==========================================================
-   * Authorization Header
+   * Access Token
    * ==========================================================
    */
 
-  async getAuthorizationHeader(): Promise<
-    Record<string, string>
-  > {
-    const token = await this.getAccessToken();
-
-    if (!token) {
-      return {};
-    }
-
-    return {
-      Authorization: `Bearer ${token}`,
-    };
+  async getAccessToken(): Promise<string | null> {
+    return tokenService.getAccessToken();
   }
 }
 
-export const tokenService = new TokenService();
+export const authService = new AuthService();
 
-export default tokenService;
+export default authService;

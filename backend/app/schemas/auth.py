@@ -1,5 +1,5 @@
-
 from pydantic import BaseModel, EmailStr
+from app.schemas.user import UserResponse
 
 
 # =========================================================
@@ -12,17 +12,29 @@ class LoginRequest(BaseModel):
 
 
 # =========================================================
-# Token Response
+# Register Request
+# =========================================================
+
+class RegisterRequest(BaseModel):
+    full_name: str
+    username: str
+    email: EmailStr
+    password: str
+
+
+# =========================================================
+# Login Response
 # =========================================================
 
 class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+    user: UserResponse
 
 
 # =========================================================
-# Refresh Token Request
+# Refresh Token
 # =========================================================
 
 class RefreshTokenRequest(BaseModel):
@@ -30,12 +42,10 @@ class RefreshTokenRequest(BaseModel):
 
 
 # =========================================================
-# Decoded Token Payload
+# Token Payload
 # =========================================================
 
 class TokenPayload(BaseModel):
-    user_id: int | None = None
+    sub: str | None = None
     email: str | None = None
-    role: str | None = None
     exp: int | None = None
-
