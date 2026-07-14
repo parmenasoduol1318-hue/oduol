@@ -1,153 +1,52 @@
-import api from "../api/client";
-import API_ENDPOINTS from "../api/endpoints";
-import { tokenService } from "./tokenService";
+// frontend/services/auth/tokenService.ts
+
+import {
+  SecureStorage,
+  StorageKeys,
+} from "../../lib/storage";
 
 /**
  * ==========================================================
- * Authentication Types
+ * Token Service
+ * ==========================================================
+ * The ONLY place responsible for:
+ * - access token
+ * - refresh token
+ * - authenticated session
  * ==========================================================
  */
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface RegisterRequest {
-  full_name: string;
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: string;
-  user: {
-    id: number;
-    full_name: string;
-    email: string;
-    is_active: boolean;
-    is_verified: boolean;
-    created_at?: string;
-  };
-}
-
-/**
- * ==========================================================
- * Authentication Service
- * ==========================================================
- */
-
-class AuthService {
-  /**
-   * ==========================================================
-   * Register
-   * ==========================================================
-   */
-
-  async register(payload: RegisterRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
-      API_ENDPOINTS.AUTH.REGISTER,
-      payload
-    );
-
-    await tokenService.saveSession(
-      response.access_token,
-      response.refresh_token,
-      response.user.id
-    );
-
-    return response;
-  }
+class TokenService {
+  private readonly USER_ID_KEY = "user_id";
 
   /**
    * ==========================================================
-   * Login
+   * Save Complete Session
    * ==========================================================
    */
+  async saveSession(
+    accessToken: string,
+    refreshToken: string,
+    userId?: number | string
+  ): Promise<void> {
+    await Promise.all([
+      SecureStorage.set(
+        StorageKeys.ACCESS_TOKEN,
+        accessToken
+      ),
 
-  async login(payload: LoginRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
-      API_ENDPOINTS.AUTH.LOGIN,
-      payload
-    );
+      SecureStorage.set(
+        StorageKeys.REFRESH_TOKEN,
+        refreshToken
+      ),
 
-    await tokenService.saveSession(
-      response.access_token,
-      response.refresh_token,
-      response.user.id
-    );
-
-    return response;
-  }
-
-  /**
-   * ==========================================================
-   * Logout
-   * ==========================================================
-   */
-
-  async logout(): Promise<void> {
-    try {
-      await api.post(API_ENDPOINTS.AUTH.LOGOUT);
-    } catch (error) {
-      // Ignore backend logout failures.
-    }
-
-    await tokenService.clearTokens();
-  }
-
-  /**
-   * ==========================================================
-   * Refresh Token
-   * ==========================================================
-   */
-
-  async refreshToken(): Promise<string | null> {
-    const refreshToken = await tokenService.getRefreshToken();
-
-    if (!refreshToken) {
-      return null;
-    }
-
-    const response = await api.post<{
-      access_token: string;
-      refresh_token?: string;
-    }>(
-      API_ENDPOINTS.AUTH.REFRESH,
-      {
-        refresh_token: refreshToken,
-      }
-    );
-
-    await tokenService.setAccessToken(response.access_token);
-
-    if (response.refresh_token) {
-      await tokenService.setRefreshToken(response.refresh_token);
-    }
-
-    return response.access_token;
-  }
-
-  /**
-   * ==========================================================
-   * Current User
-   * ==========================================================
-   */
-
-  async getCurrentUser() {
-    return api.get(API_ENDPOINTS.AUTH.ME);
-  }
-
-  /**
-   * ==========================================================
-   * Authentication Status
-   * ==========================================================
-   */
-
-  async isAuthenticated(): Promise<boolean> {
-    return tokenService.isAuthenticated();
+      userId !== undefined
+        ? SecureStorage.set(
+            this.USER_ID_KEY,
+            String(userId)
+          )
+        : Promise.resolve(),
+    ]);
   }
 
   /**
@@ -157,10 +56,94 @@ class AuthService {
    */
 
   async getAccessToken(): Promise<string | null> {
-    return tokenService.getAccessToken();
+    return SecureStorage.get<string>(
+      StorageKeys.ACCESS_TOKEN
+    );
+  }
+
+  async setAccessToken(
+    token: string
+  ): Promise<void> {
+    await SecureStorage.set(
+      StorageKeys.ACCESS_TOKEN,
+      token
+    );
+  }
+
+  /**
+   * ==========================================================
+   * Refresh Token
+   * ==========================================================
+   */
+
+  async getRefreshToken(): Promise<string | null> {
+    return SecureStorage.get<string>(
+      StorageKeys.REFRESH_TOKEN
+    );
+  }
+
+  async setRefreshToken(
+    token: string
+  ): Promise<void> {
+    await SecureStorage.set(
+      StorageKeys.REFRESH_TOKEN,
+      token
+    );
+  }
+
+  /**
+   * ==========================================================
+   * User Id
+   * ==========================================================
+   */
+
+  async getUserId(): Promise<string | null> {
+    return SecureStorage.get<string>(
+      this.USER_ID_KEY
+    );
+  }
+
+  /**
+   * ==========================================================
+   * Clear Session
+   * ==========================================================
+   */
+
+  async clearSession(): Promise<void> {
+    await Promise.all([
+      SecureStorage.remove(
+        StorageKeys.ACCESS_TOKEN
+      ),
+
+      SecureStorage.remove(
+        StorageKeys.REFRESH_TOKEN
+      ),
+
+      SecureStorage.remove(
+        this.USER_ID_KEY
+      ),
+    ]);
+  }
+
+  /**
+   * Backward compatibility
+   */
+
+  async clearTokens(): Promise<void> {
+    await this.clearSession();
+  }
+
+  /**
+   * ==========================================================
+   * Authentication Status
+   * ==========================================================
+   */
+
+  async isAuthenticated(): Promise<boolean> {
+    return !!(await this.getAccessToken());
   }
 }
 
-export const authService = new AuthService();
+export const tokenService = new TokenService();
 
-export default authService;
+export default tokenService;

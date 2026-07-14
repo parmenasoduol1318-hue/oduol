@@ -52,18 +52,18 @@ export default function RegisterScreen() {
     try {
       setLoading(true);
 
-      await register({
-        full_name: name.trim(),
-        email: email.trim(),
-        password,
-      });
+      await register(
+  name.trim(),
+  email.trim(),
+  password
+);
 
       Alert.alert(
         "Registration Successful",
         "Your account has been created successfully."
       );
 
-      router.replace("/(tabs)");
+      router.replace("/(tabs)/");
     } catch (error: any) {
       Alert.alert(
         "Registration Failed",

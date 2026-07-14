@@ -1,48 +1,47 @@
+// frontend/services/api/client.ts
+
 import axios, {
+  AxiosError,
   AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
 } from "axios";
 
-import { API_BASE_URL } from "../../config/api";
+import API_CONFIG from "../../config/api";
 import { tokenService } from "../auth/tokenService";
 
 /**
  * ==========================================================
- * Axios Client
+ * SwiftReply HTTP Client
+ * ==========================================================
+ * This is the ONLY Axios client that should exist.
+ * All services must import from here.
  * ==========================================================
  */
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 30000,
-  headers: {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-  },
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
+  headers: API_CONFIG.HEADERS,
 });
 
 /**
  * ==========================================================
  * Request Interceptor
- * Automatically attach JWT token
+ * Automatically attach JWT access token.
  * ==========================================================
  */
 
 apiClient.interceptors.request.use(
-  async (config: AxiosRequestConfig): Promise<any> => {
-    try {
-      const token = await tokenService.getAccessToken();
+  async (config) => {
+    const token = await tokenService.getAccessToken();
 
-      if (token) {
-        config.headers = config.headers ?? {};
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-
-      return config;
-    } catch (error) {
-      return Promise.reject(error);
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
     }
+
+    return config;
   },
   (error) => Promise.reject(error)
 );
@@ -56,7 +55,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
 
-  async (error) => {
+  async (error: AxiosError) => {
     if (error.response?.status === 401) {
       await tokenService.clearTokens();
     }
@@ -67,50 +66,52 @@ apiClient.interceptors.response.use(
 
 /**
  * ==========================================================
- * HTTP Helpers
+ * Typed HTTP Helpers
  * ==========================================================
  */
 
 export const api = {
-  get: async <T>(url: string, config?: AxiosRequestConfig) => {
-    const response = await apiClient.get<T>(url, config);
-    return response.data;
+  get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    return apiClient.get<T>(url, config).then((r) => r.data);
   },
 
-  post: async <T>(
+  post<T>(
+  url: string,
+  data?: unknown,
+  config?: AxiosRequestConfig
+): Promise<T> {
+  return apiClient.post<T>(url, data, config).then((r) => {
+    console.log("AXIOS RESPONSE");
+    console.log(r.status);
+    console.log(r.data);
+    return r.data;
+  });
+},
+
+  put<T>(
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
-  ) => {
-    const response = await apiClient.post<T>(url, data, config);
-    return response.data;
+  ): Promise<T> {
+    return apiClient.put<T>(url, data, config).then((r) => r.data);
   },
 
-  put: async <T>(
+  patch<T>(
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
-  ) => {
-    const response = await apiClient.put<T>(url, data, config);
-    return response.data;
+  ): Promise<T> {
+    return apiClient.patch<T>(url, data, config).then((r) => r.data);
   },
 
-  patch: async <T>(
-    url: string,
-    data?: unknown,
-    config?: AxiosRequestConfig
-  ) => {
-    const response = await apiClient.patch<T>(url, data, config);
-    return response.data;
-  },
-
-  delete: async <T>(
+  delete<T>(
     url: string,
     config?: AxiosRequestConfig
-  ) => {
-    const response = await apiClient.delete<T>(url, config);
-    return response.data;
+  ): Promise<T> {
+    return apiClient.delete<T>(url, config).then((r) => r.data);
   },
 };
 
-export default apiClient;
+export { apiClient };
+
+export default api;

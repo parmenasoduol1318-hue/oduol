@@ -21,7 +21,7 @@ export const ENV = {
   API_URL:
     extra.API_URL ??
     (__DEV__
-      ? "http://127.0.0.1:8000/api"
+      ? "https://swiftreply-njbt.onrender.com/api"
       : "https://api.swiftreply.ai/api"),
 
   OPENAI_MODEL:

@@ -3,171 +3,109 @@
  * SwiftReply Backend API Endpoints
  * ==========================================================
  *
- * All backend endpoints should be defined here.
- * Never hardcode endpoint strings elsewhere.
- *
- * Base URL is configured in config/api.ts.
- * Example:
- * api.post(API_ENDPOINTS.AUTH.LOGIN, payload)
+ * API_BASE_URL already contains "/api"
+ * so NEVER prefix endpoints with "/api".
  * ==========================================================
  */
 
-export const API_ENDPOINTS = {
-  // ==========================================================
-  // Authentication
-  // ==========================================================
+const API_ENDPOINTS = {
   AUTH: {
-    REGISTER: "/api/auth/register",
-    LOGIN: "/api/auth/login",
-    REFRESH: "/api/auth/refresh",
-    LOGOUT: "/api/auth/logout",
-    ME: "/api/auth/me",
+    REGISTER: "/auth/register",
+    LOGIN: "/auth/login",
+    REFRESH: "/auth/refresh",
+    LOGOUT: "/auth/logout",
+    ME: "/auth/me",
   },
 
-  // ==========================================================
-  // Users
-  // ==========================================================
   USERS: {
-    ME: "/api/users/me",
-    UPDATE_ME: "/api/users/me",
-    DELETE_ME: "/api/users/me",
-
-    BY_ID: (userId: number | string) => `/api/users/${userId}`,
+    ME: "/users/me",
+    UPDATE_ME: "/users/me",
+    DELETE_ME: "/users/me",
+    BY_ID: (userId: number | string) => `/users/${userId}`,
   },
 
-  // ==========================================================
-  // Chats
-  // ==========================================================
   CHATS: {
-    LIST: "/api/chats",
-    CREATE: "/api/chats",
-
-    DETAILS: (chatId: number | string) =>
-      `/api/chats/${chatId}`,
-
-    UPDATE: (chatId: number | string) =>
-      `/api/chats/${chatId}`,
-
-    DELETE: (chatId: number | string) =>
-      `/api/chats/${chatId}`,
+    LIST: "/chats",
+    CREATE: "/chats",
+    DETAILS: (chatId: number | string) => `/chats/${chatId}`,
+    UPDATE: (chatId: number | string) => `/chats/${chatId}`,
+    DELETE: (chatId: number | string) => `/chats/${chatId}`,
   },
 
-  // ==========================================================
-  // Messages
-  // ==========================================================
   MESSAGES: {
-    LIST: (chatId: number | string) =>
-      `/api/messages/${chatId}`,
-
-    SEND: "/api/messages",
-
-    DELETE: (messageId: number | string) =>
-      `/api/messages/${messageId}`,
+    LIST: (chatId: number | string) => `/messages/${chatId}`,
+    SEND: "/messages",
+    DELETE: (messageId: number | string) => `/messages/${messageId}`,
   },
 
-  // ==========================================================
-  // AI
-  // ==========================================================
   AI: {
-    CHAT: "/api/ai/chat",
-    REWRITE: "/api/ai/rewrite",
-    TRANSLATE: "/api/ai/translate",
-    SUMMARIZE: "/api/ai/summarize",
-    RESEARCH: "/api/ai/research",
-    CODE: "/api/ai/code",
-
-    IMAGE: "/api/ai/image",
-    VISION: "/api/ai/vision",
-
-    SPEECH_TO_TEXT: "/api/ai/speech-to-text",
-    TEXT_TO_SPEECH: "/api/ai/text-to-speech",
-
-    EMBEDDINGS: "/api/ai/embeddings",
-    PROMPTS: "/api/ai/prompts",
+    CHAT: "/ai/chat",
+    REWRITE: "/ai/rewrite",
+    TRANSLATE: "/ai/translate",
+    SUMMARIZE: "/ai/summarize",
+    RESEARCH: "/ai/research",
+    CODE: "/ai/code",
+    IMAGE: "/ai/image",
+    VISION: "/ai/vision",
+    SPEECH_TO_TEXT: "/ai/speech-to-text",
+    TEXT_TO_SPEECH: "/ai/text-to-speech",
+    EMBEDDINGS: "/ai/embeddings",
+    PROMPTS: "/ai/prompts",
   },
 
-  // ==========================================================
-  // Voice
-  // ==========================================================
   VOICE: {
-    RECORD: "/api/voice/record",
-    TRANSCRIBE: "/api/voice/transcribe",
-    SYNTHESIZE: "/api/voice/synthesize",
+    SPEECH_TO_TEXT: "/voice/speech-to-text",
+    TEXT_TO_SPEECH: "/voice/text-to-speech",
+    CONVERSATION: "/voice/conversation",
+    CLONE: "/voice/clone",
   },
 
-  // ==========================================================
-  // Images
-  // ==========================================================
   IMAGES: {
-    GENERATE: "/api/images/generate",
-    EDIT: "/api/images/edit",
-    UPSCALE: "/api/images/upscale",
+    GENERATE: "/images",
+    EDIT: "/images/edit",
+    UPSCALE: "/images/upscale",
+    REMOVE_BACKGROUND: "/images/remove-background",
+    OCR: "/images/ocr",
+    DESCRIBE: "/images/describe",
+    SAVE: "/images/save",
   },
 
-  // ==========================================================
-  // Files
-  // ==========================================================
   FILES: {
-    UPLOAD: "/api/files/upload",
-    DOWNLOAD: (fileId: number | string) =>
-      `/api/files/${fileId}`,
+    UPLOAD: "/files/upload",
+    DOWNLOAD: (id: number | string) => `/files/${id}`,
   },
 
-  // ==========================================================
-  // Memory
-  // ==========================================================
   MEMORY: {
-    LIST: "/api/memory",
-    CREATE: "/api/memory",
-
-    DELETE: (memoryId: number | string) =>
-      `/api/memory/${memoryId}`,
+    LIST: "/memory",
+    CREATE: "/memory",
+    DELETE: (id: number | string) => `/memory/${id}`,
   },
 
-  // ==========================================================
-  // Notifications
-  // ==========================================================
   NOTIFICATIONS: {
-    LIST: "/api/notifications",
-
-    READ: (notificationId: number | string) =>
-      `/api/notifications/${notificationId}/read`,
+    LIST: "/notifications",
+    READ: (id: number | string) => `/notifications/${id}/read`,
   },
 
-  // ==========================================================
-  // Subscription
-  // ==========================================================
   SUBSCRIPTIONS: {
-    CURRENT: "/api/subscriptions/current",
-    PLANS: "/api/subscriptions/plans",
-    UPGRADE: "/api/subscriptions/upgrade",
-    CANCEL: "/api/subscriptions/cancel",
+    CURRENT: "/subscriptions/current",
+    PLANS: "/subscriptions/plans",
+    UPGRADE: "/subscriptions",
+    CANCEL: "/subscriptions/cancel",
   },
 
-  // ==========================================================
-  // Payments
-  // ==========================================================
   PAYMENTS: {
-    MPESA: "/api/payments/mpesa",
-    PAYPAL: "/api/payments/paypal",
-
-    VERIFY: (paymentId: number | string) =>
-      `/api/payments/${paymentId}/verify`,
+    MPESA: "/payments",
+    PAYPAL: "/payments/paypal",
+    VERIFY: (id: number | string) => `/payments/${id}/verify`,
   },
 
-  // ==========================================================
-  // Analytics
-  // ==========================================================
   ANALYTICS: {
-    DASHBOARD: "/api/analytics/dashboard",
-    USAGE: "/api/analytics/usage",
+    DASHBOARD: "/analytics/dashboard",
+    USAGE: "/analytics/usage",
   },
 
-  // ==========================================================
-  // Health
-  // ==========================================================
   HEALTH: {
-    CHECK: "/api/health",
+    CHECK: "/health",
   },
 } as const;
 

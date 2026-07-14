@@ -14,10 +14,9 @@ import {
 import { Link, Stack, router } from "expo-router";
 
 import { useAuthStore } from "../../store/authStore";
-import { authService } from "../../services/auth/authService";
 
 export default function LoginScreen() {
-  const storeLogin = useAuthStore((state) => state.login);
+  const login = useAuthStore((state) => state.login);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,31 +34,26 @@ export default function LoginScreen() {
     try {
       setLoading(true);
 
-      const response = await authService.login({
-        email: email.trim(),
-        password,
-      });
+      console.log("STEP 1");
 
-      storeLogin(
-        {
-          id: String(response.user.id),
-          name: response.user.full_name,
-          email: response.user.email,
-          avatar: null,
-          isPro: false,
-          createdAt: response.user.created_at,
-        },
-        response.access_token,
-        response.refresh_token
+      await login(
+        email.trim(),
+        password
       );
 
-      router.replace("/(tabs)");
-    } catch (error: any) {
+      console.log("STEP 2");
+
+      router.replace("/(tabs)/");
+
+      console.log("STEP 3");
+    } catch (e: any) {
+      console.error("LOGIN ERROR", e);
+
       Alert.alert(
         "Login Failed",
-        error?.response?.data?.detail ||
-          error?.message ||
-          "Invalid email or password."
+        e?.response?.data?.detail ||
+          e?.message ||
+          "Unable to login."
       );
     } finally {
       setLoading(false);
@@ -72,7 +66,11 @@ export default function LoginScreen() {
 
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : undefined
+        }
       >
         <ScrollView
           contentContainerStyle={styles.content}
@@ -80,7 +78,9 @@ export default function LoginScreen() {
         >
           <Text style={styles.logo}>SwiftReply</Text>
 
-          <Text style={styles.title}>Welcome Back</Text>
+          <Text style={styles.title}>
+            Welcome Back
+          </Text>
 
           <Text style={styles.subtitle}>
             Sign in to continue chatting with SwiftReply AI.
@@ -104,21 +104,36 @@ export default function LoginScreen() {
             onChangeText={setPassword}
           />
 
-          <Link href="/auth/forgot-password" asChild>
-            <TouchableOpacity style={styles.forgotContainer}>
-              <Text style={styles.forgotText}>Forgot Password?</Text>
+          <Link
+            href="/auth/forgot-password"
+            asChild
+          >
+            <TouchableOpacity
+              style={styles.forgotContainer}
+            >
+              <Text style={styles.forgotText}>
+                Forgot Password?
+              </Text>
             </TouchableOpacity>
           </Link>
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[
+              styles.button,
+              loading &&
+                styles.buttonDisabled,
+            ]}
             disabled={loading}
             onPress={handleLogin}
           >
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>Login</Text>
+              <Text
+                style={styles.buttonText}
+              >
+                Login
+              </Text>
             )}
           </TouchableOpacity>
 
@@ -127,9 +142,19 @@ export default function LoginScreen() {
               Don't have an account?
             </Text>
 
-            <Link href="/auth/register" asChild>
+            <Link
+              href="/auth/register"
+              asChild
+            >
               <TouchableOpacity>
-                <Text style={styles.registerText}> Register</Text>
+                <Text
+                  style={
+                    styles.registerText
+                  }
+                >
+                  {" "}
+                  Register
+                </Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -144,13 +169,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
-
   content: {
     flexGrow: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
   },
-
   logo: {
     fontSize: 34,
     fontWeight: "700",
@@ -158,7 +181,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
   },
-
   title: {
     fontSize: 30,
     fontWeight: "700",
@@ -166,14 +188,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 8,
   },
-
   subtitle: {
     fontSize: 15,
     color: "#6B7280",
     textAlign: "center",
     marginBottom: 30,
   },
-
   input: {
     borderWidth: 1,
     borderColor: "#D1D5DB",
@@ -184,46 +204,39 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontSize: 16,
   },
-
   forgotContainer: {
     alignSelf: "flex-end",
     marginBottom: 24,
   },
-
   forgotText: {
     color: "#2563EB",
     fontWeight: "600",
   },
-
   button: {
     backgroundColor: "#2563EB",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
   },
-
   buttonDisabled: {
     opacity: 0.7,
   },
-
   buttonText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
   },
-
   footer: {
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 28,
   },
-
   footerText: {
     color: "#6B7280",
   },
-
   registerText: {
     color: "#2563EB",
     fontWeight: "700",
   },
 });
+

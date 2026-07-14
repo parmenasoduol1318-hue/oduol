@@ -1,35 +1,41 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
-# =========================================================
+# ==========================================================
 # Base
-# =========================================================
+# ==========================================================
 
 class ChatBase(BaseModel):
-    title: str | None = Field(default=None, max_length=255)
+    title: str | None = Field(
+        default=None,
+        max_length=255,
+    )
 
 
-# =========================================================
+# ==========================================================
 # Create
-# =========================================================
+# ==========================================================
 
 class ChatCreate(ChatBase):
     pass
 
 
-# =========================================================
+# ==========================================================
 # Update
-# =========================================================
+# ==========================================================
 
 class ChatUpdate(BaseModel):
-    title: str | None = Field(default=None, max_length=255)
+    title: str | None = Field(
+        default=None,
+        max_length=255,
+    )
 
 
-# =========================================================
+# ==========================================================
 # Response
-# =========================================================
+# ==========================================================
 
 class ChatResponse(ChatBase):
     id: int
@@ -37,5 +43,6 @@ class ChatResponse(ChatBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

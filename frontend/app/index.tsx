@@ -1,72 +1,24 @@
 // frontend/app/index.tsx
 
-import React, { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import React from "react";
+import {
+  ActivityIndicator,
+  View,
+} from "react-native";
 import { Redirect } from "expo-router";
 
 import { useAuthStore } from "../store/authStore";
-import { useAppStore } from "../store/appStore";
-import { LocalStorage, SecureStorage, StorageKeys } from "../lib/storage";
 
 export default function Index() {
-  const {
-    authenticated,
-    login,
-    logout,
-  } = useAuthStore();
+  const authenticated = useAuthStore(
+    (state) => state.authenticated
+  );
 
-  const {
-    initialized,
-    setInitialized,
-  } = useAppStore();
+  const loading = useAuthStore(
+    (state) => state.loading
+  );
 
-  useEffect(() => {
-    initializeApp();
-  }, []);
-
-  const initializeApp = async () => {
-    try {
-      const accessToken =
-        await SecureStorage.get<string>(
-          StorageKeys.ACCESS_TOKEN
-        );
-
-      const refreshToken =
-        await SecureStorage.get<string>(
-          StorageKeys.REFRESH_TOKEN
-        );
-
-      const user =
-        await LocalStorage.get(
-          StorageKeys.USER
-        );
-
-      if (
-        accessToken &&
-        refreshToken &&
-        user
-      ) {
-        login(
-          user,
-          accessToken,
-          refreshToken
-        );
-      } else {
-        logout();
-      }
-    } catch (error) {
-      console.error(
-        "Initialization failed:",
-        error
-      );
-
-      logout();
-    } finally {
-      setInitialized(true);
-    }
-  };
-
-  if (!initialized) {
+  if (loading) {
     return (
       <View
         style={{
@@ -81,8 +33,8 @@ export default function Index() {
   }
 
   if (authenticated) {
-    return <Redirect href="/chat" />;
+    return <Redirect href="/(tabs)" />;
   }
 
-  return <Redirect href="/login" />;
+  return <Redirect href="/auth/login" />;
 }

@@ -262,7 +262,7 @@ Create a `.env` file.
 Example:
 
 ```env
-EXPO_PUBLIC_API_URL=https://your-backend-url.com
+NEXT_PUBLIC_API_URL=https://your-backend-url.com
 
 EXPO_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_client_id
 

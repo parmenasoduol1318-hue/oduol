@@ -3,12 +3,12 @@
 import axios, { AxiosInstance } from "axios";
 
 const API_URL =
-  process.env.EXPO_PUBLIC_API_URL ??
-  "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://swiftreply-njbt.onrender.com";
 
-/* ======================================================
-   Types
-====================================================== */
+/* ===========================================================
+   TYPES
+=========================================================== */
 
 export type MessageRole =
   | "system"
@@ -16,46 +16,24 @@ export type MessageRole =
   | "assistant";
 
 export interface ChatMessage {
-  id?: string;
-
+  id: number;
+  chat_id: number;
   role: MessageRole;
-
   content: string;
-
-  created_at?: string;
+  created_at: string;
 }
 
 export interface ChatSession {
-  id: string;
-
-  title: string;
-
+  id: number;
+  user_id: number;
+  title: string | null;
   created_at: string;
-
   updated_at: string;
-}
-
-export interface SendMessageRequest {
-  chat_id: string;
-
-  message: string;
 }
 
 export interface RenameChatRequest {
   title: string;
 }
-
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-
-  message: string;
-
-  data: T;
-}
-
-/* ======================================================
-   Service
-====================================================== */
 
 class ChatService {
   private api: AxiosInstance;
@@ -65,128 +43,108 @@ class ChatService {
       baseURL: API_URL,
       timeout: 30000,
       headers: {
-        "Content-Type":
-          "application/json",
+        "Content-Type": "application/json",
       },
     });
   }
 
-  /* ==========================================
-     Authentication
-  ========================================== */
+  /* ===========================================================
+     AUTH
+  =========================================================== */
 
   setAccessToken(token: string) {
-    this.api.defaults.headers.common.Authorization =
-      `Bearer ${token}`;
+    this.api.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${token}`;
   }
 
   clearAccessToken() {
-    delete this.api.defaults.headers.common.Authorization;
+    delete this.api.defaults.headers.common[
+      "Authorization"
+    ];
   }
 
-  /* ==========================================
-     Chat Sessions
-  ========================================== */
+  /* ===========================================================
+     CHATS
+  =========================================================== */
 
-  async getChats() {
-    const response =
-      await this.api.get<
-        ApiResponse<ChatSession[]>
-      >("/api/chat/history");
+  async getChats(): Promise<ChatSession[]> {
+    const response = await this.api.get<ChatSession[]>(
+      "/api/chats"
+    );
 
     return response.data;
   }
 
-  async createChat() {
+  async createChat(
+    title = "New Chat"
+  ): Promise<ChatSession> {
     const response =
-      await this.api.post<
-        ApiResponse<ChatSession>
-      >("/api/chat/new");
+      await this.api.post<ChatSession>(
+        "/api/chats",
+        {
+          title,
+        }
+      );
+
+    return response.data;
+  }
+
+  async getChat(
+    chatId: number
+  ): Promise<ChatSession> {
+    const response =
+      await this.api.get<ChatSession>(
+        `/api/chats/${chatId}`
+      );
 
     return response.data;
   }
 
   async renameChat(
-    chatId: string,
-    payload: RenameChatRequest
-  ) {
+    chatId: number,
+    title: string
+  ): Promise<ChatSession> {
     const response =
-      await this.api.put<
-        ApiResponse<ChatSession>
-      >(
-        `/api/chat/${chatId}`,
-        payload
+      await this.api.put<ChatSession>(
+        `/api/chats/${chatId}`,
+        {
+          title,
+        }
       );
 
     return response.data;
   }
 
-  async deleteChat(chatId: string) {
-    const response =
-      await this.api.delete<
-        ApiResponse
-      >(`/api/chat/${chatId}`);
-
-    return response.data;
+  async deleteChat(
+    chatId: number
+  ): Promise<void> {
+    await this.api.delete(
+      `/api/chats/${chatId}`
+    );
   }
 
-  /* ==========================================
-     Messages
-  ========================================== */
-
-  async getMessages(chatId: string) {
+  async archiveChat(
+    chatId: number
+  ): Promise<ChatSession> {
     const response =
-      await this.api.get<
-        ApiResponse<ChatMessage[]>
-      >(
-        `/api/chat/${chatId}/messages`
+      await this.api.patch<ChatSession>(
+        `/api/chats/${chatId}/archive`
       );
 
     return response.data;
   }
 
-  async sendMessage(
-    payload: SendMessageRequest
-  ) {
+  async unarchiveChat(
+    chatId: number
+  ): Promise<ChatSession> {
     const response =
-      await this.api.post<
-        ApiResponse<ChatMessage>
-      >(
-        "/api/chat/send",
-        payload
-      );
-
-    return response.data;
-  }
-
-  async regenerateResponse(
-    chatId: string
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse<ChatMessage>
-      >(
-        `/api/chat/${chatId}/regenerate`
-      );
-
-    return response.data;
-  }
-
-  async stopGeneration(
-    chatId: string
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse
-      >(
-        `/api/chat/${chatId}/stop`
+      await this.api.patch<ChatSession>(
+        `/api/chats/${chatId}/unarchive`
       );
 
     return response.data;
   }
 }
 
-const chatService =
-  new ChatService();
-
-export default chatService;
+export default new ChatService();

@@ -1,6 +1,7 @@
 // frontend/store/chatStore.ts
 
 import { create } from "zustand";
+import chatService from "@/services/chat/chatService";
 
 export type MessageRole =
   | "system"
@@ -8,34 +9,35 @@ export type MessageRole =
   | "assistant";
 
 export interface ChatMessage {
-  id: string;
+  id: number;
   role: MessageRole;
   content: string;
   createdAt: string;
 }
 
 export interface Chat {
-  id: string;
+  id: number;
   title: string;
+  last_message?: string;
   messages: ChatMessage[];
   createdAt: string;
   updatedAt: string;
 }
 
 interface ChatState {
-  /* ==========================================
-     State
-  ========================================== */
-
   chats: Chat[];
-
-  currentChatId: string | null;
-
+  currentChatId: number | null;
   loading: boolean;
 
-  /* ==========================================
-     Actions
-  ========================================== */
+  fetchChats: () => Promise<void>;
+
+  createChat: (
+    title?: string
+  ) => Promise<Chat | null>;
+
+  deleteChat: (
+    chatId: number
+  ) => Promise<void>;
 
   setChats: (
     chats: Chat[]
@@ -46,32 +48,17 @@ interface ChatState {
   ) => void;
 
   updateChat: (
-    chatId: string,
+    chatId: number,
     updates: Partial<Chat>
   ) => void;
 
-  deleteChat: (
-    chatId: string
-  ) => void;
-
   setCurrentChat: (
-    chatId: string | null
+    chatId: number | null
   ) => void;
 
   addMessage: (
-    chatId: string,
+    chatId: number,
     message: ChatMessage
-  ) => void;
-
-  updateMessage: (
-    chatId: string,
-    messageId: string,
-    updates: Partial<ChatMessage>
-  ) => void;
-
-  deleteMessage: (
-    chatId: string,
-    messageId: string
   ) => void;
 
   setLoading: (
@@ -93,10 +80,124 @@ export const useChatStore =
   create<ChatState>((set) => ({
     ...initialState,
 
-    setChats: (chats) =>
-      set({ chats }),
+    fetchChats: async () => {
+      try {
+        set({ loading: true });
 
-    addChat: (chat) =>
+        const response =
+          await chatService.getChats();
+
+        const chats: Chat[] =
+          response.map((chat) => ({
+            id: chat.id,
+            title:
+              chat.title ??
+              "New Chat",
+            last_message: "",
+            messages: [],
+            createdAt:
+              chat.created_at,
+            updatedAt:
+              chat.updated_at,
+          }));
+
+        set({
+          chats,
+          loading: false,
+        });
+      } catch (error) {
+        console.error(
+          "fetchChats:",
+          error
+        );
+
+        set({
+          loading: false,
+        });
+      }
+    },
+
+    createChat: async (
+      title = "New Chat"
+    ) => {
+      try {
+        const response =
+          await chatService.createChat(
+            title
+          );
+
+        const chat: Chat = {
+          id: response.id,
+          title:
+            response.title ??
+            title,
+          last_message: "",
+          messages: [],
+          createdAt:
+            response.created_at,
+          updatedAt:
+            response.updated_at,
+        };
+
+        set((state) => ({
+          chats: [
+            chat,
+            ...state.chats,
+          ],
+          currentChatId:
+            chat.id,
+        }));
+
+        return chat;
+      } catch (error) {
+        console.error(
+          "createChat:",
+          error
+        );
+
+        return null;
+      }
+    },
+
+    deleteChat: async (
+      chatId
+    ) => {
+      try {
+        await chatService.deleteChat(
+          chatId
+        );
+
+        set((state) => ({
+          chats:
+            state.chats.filter(
+              (chat) =>
+                chat.id !==
+                chatId
+            ),
+          currentChatId:
+            state.currentChatId ===
+            chatId
+              ? null
+              : state.currentChatId,
+        }));
+      } catch (error) {
+        console.error(
+          "deleteChat:",
+          error
+        );
+      }
+    },
+
+    setChats: (
+      chats
+    ) =>
+      set({
+        chats,
+      }),
+
+    addChat: (
+      chat
+    ) =>
       set((state) => ({
         chats: [
           chat,
@@ -109,39 +210,27 @@ export const useChatStore =
       updates
     ) =>
       set((state) => ({
-        chats: state.chats.map(
-          (chat) =>
-            chat.id === chatId
-              ? {
-                  ...chat,
-                  ...updates,
-                  updatedAt:
-                    new Date().toISOString(),
-                }
-              : chat
-        ),
-      })),
-
-    deleteChat: (
-      chatId
-    ) =>
-      set((state) => ({
-        chats: state.chats.filter(
-          (chat) =>
-            chat.id !== chatId
-        ),
-        currentChatId:
-          state.currentChatId ===
-          chatId
-            ? null
-            : state.currentChatId,
+        chats:
+          state.chats.map(
+            (chat) =>
+              chat.id ===
+              chatId
+                ? {
+                    ...chat,
+                    ...updates,
+                    updatedAt:
+                      new Date().toISOString(),
+                  }
+                : chat
+          ),
       })),
 
     setCurrentChat: (
       chatId
     ) =>
       set({
-        currentChatId: chatId,
+        currentChatId:
+          chatId,
       }),
 
     addMessage: (
@@ -149,76 +238,24 @@ export const useChatStore =
       message
     ) =>
       set((state) => ({
-        chats: state.chats.map(
-          (chat) =>
-            chat.id === chatId
-              ? {
-                  ...chat,
-                  messages: [
-                    ...chat.messages,
-                    message,
-                  ],
-                  updatedAt:
-                    new Date().toISOString(),
-                }
-              : chat
-        ),
-      })),
-
-    updateMessage: (
-      chatId,
-      messageId,
-      updates
-    ) =>
-      set((state) => ({
-        chats: state.chats.map(
-          (chat) => {
-            if (
-              chat.id !== chatId
-            )
-              return chat;
-
-            return {
-              ...chat,
-              messages:
-                chat.messages.map(
-                  (message) =>
-                    message.id ===
-                    messageId
-                      ? {
-                          ...message,
-                          ...updates,
-                        }
-                      : message
-                ),
-            };
-          }
-        ),
-      })),
-
-    deleteMessage: (
-      chatId,
-      messageId
-    ) =>
-      set((state) => ({
-        chats: state.chats.map(
-          (chat) => {
-            if (
-              chat.id !== chatId
-            )
-              return chat;
-
-            return {
-              ...chat,
-              messages:
-                chat.messages.filter(
-                  (message) =>
-                    message.id !==
-                    messageId
-                ),
-            };
-          }
-        ),
+        chats:
+          state.chats.map(
+            (chat) =>
+              chat.id ===
+              chatId
+                ? {
+                    ...chat,
+                    messages: [
+                      ...chat.messages,
+                      message,
+                    ],
+                    last_message:
+                      message.content,
+                    updatedAt:
+                      new Date().toISOString(),
+                  }
+                : chat
+          ),
       })),
 
     setLoading: (
@@ -231,7 +268,8 @@ export const useChatStore =
     clearChats: () =>
       set({
         chats: [],
-        currentChatId: null,
+        currentChatId:
+          null,
       }),
 
     reset: () =>

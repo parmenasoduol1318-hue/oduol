@@ -1,83 +1,164 @@
-from __future__ import annotations
-
 from sqlalchemy.orm import Session
 
 from app.models.chat import Chat
-from app.models.message import Message
+from app.models.user import User
+from app.schemas.chat import ChatCreate, ChatUpdate
 
 
 class ChatService:
     """
-    Handles chat creation, retrieval, and messaging logic.
+    Chat business logic.
     """
 
-    # =========================================================
-    # Chat Operations
-    # =========================================================
+    # ==========================================================
+    # Create Chat
+    # ==========================================================
 
-    def create_chat(self, db: Session, user_id: int, title: str | None = None) -> Chat:
-        chat = Chat(user_id=user_id, title=title)
+    @staticmethod
+    def create_chat(
+        db: Session,
+        owner: User,
+        payload: ChatCreate,
+    ) -> Chat:
+        chat = Chat(
+            user_id=owner.id,
+            title=payload.title or "New Chat",
+        )
+
         db.add(chat)
         db.commit()
         db.refresh(chat)
+
         return chat
 
-    def get_user_chats(self, db: Session, user_id: int) -> list[Chat]:
+    # ==========================================================
+    # Get User Chats
+    # ==========================================================
+
+    @staticmethod
+    def get_user_chats(
+        db: Session,
+        owner: User,
+        skip: int = 0,
+        limit: int = 20,
+    ):
         return (
             db.query(Chat)
-            .filter(Chat.user_id == user_id)
-            .order_by(Chat.created_at.desc())
+            .filter(Chat.user_id == owner.id)
+            .order_by(Chat.updated_at.desc())
+            .offset(skip)
+            .limit(limit)
             .all()
         )
 
-    def get_chat(self, db: Session, chat_id: int, user_id: int) -> Chat | None:
-        return (
-            db.query(Chat)
-            .filter(Chat.id == chat_id, Chat.user_id == user_id)
-            .first()
-        )
+    # ==========================================================
+    # Get One Chat
+    # ==========================================================
 
-    # =========================================================
-    # Message Operations
-    # =========================================================
-
-    def add_message(
-        self,
+    @staticmethod
+    def get_chat(
         db: Session,
         chat_id: int,
-        user_id: int,
-        role: str,
-        content: str,
-    ) -> Message:
-        message = Message(
-            chat_id=chat_id,
-            user_id=user_id,
-            role=role,
-            content=content,
-        )
-        db.add(message)
-        db.commit()
-        db.refresh(message)
-        return message
-
-    def get_chat_messages(self, db: Session, chat_id: int) -> list[Message]:
+        owner: User,
+    ):
         return (
-            db.query(Message)
-            .filter(Message.chat_id == chat_id)
-            .order_by(Message.created_at.asc())
-            .all()
-        )
-
-    def delete_chat(self, db: Session, chat_id: int, user_id: int) -> bool:
-        chat = (
             db.query(Chat)
-            .filter(Chat.id == chat_id, Chat.user_id == user_id)
+            .filter(
+                Chat.id == chat_id,
+                Chat.user_id == owner.id,
+            )
             .first()
         )
 
-        if not chat:
+    # ==========================================================
+    # Update Chat
+    # ==========================================================
+
+    @staticmethod
+    def update_chat(
+        db: Session,
+        chat_id: int,
+        owner: User,
+        payload: ChatUpdate,
+    ):
+        chat = (
+            db.query(Chat)
+            .filter(
+                Chat.id == chat_id,
+                Chat.user_id == owner.id,
+            )
+            .first()
+        )
+
+        if chat is None:
+            return None
+
+        if payload.title is not None:
+            chat.title = payload.title
+
+        db.commit()
+        db.refresh(chat)
+
+        return chat
+
+    # ==========================================================
+    # Delete Chat
+    # ==========================================================
+
+    @staticmethod
+    def delete_chat(
+        db: Session,
+        chat_id: int,
+        owner: User,
+    ) -> bool:
+        chat = (
+            db.query(Chat)
+            .filter(
+                Chat.id == chat_id,
+                Chat.user_id == owner.id,
+            )
+            .first()
+        )
+
+        if chat is None:
             return False
 
         db.delete(chat)
         db.commit()
+
         return True
+
+    # ==========================================================
+    # Archive Chat
+    # ==========================================================
+
+    @staticmethod
+    def archive_chat(
+        db: Session,
+        chat_id: int,
+        owner: User,
+    ):
+        # Archive not implemented yet.
+        # Returning the chat keeps the router working.
+        return ChatService.get_chat(
+            db=db,
+            chat_id=chat_id,
+            owner=owner,
+        )
+
+    # ==========================================================
+    # Unarchive Chat
+    # ==========================================================
+
+    @staticmethod
+    def unarchive_chat(
+        db: Session,
+        chat_id: int,
+        owner: User,
+    ):
+        # Unarchive not implemented yet.
+        return ChatService.get_chat(
+            db=db,
+            chat_id=chat_id,
+            owner=owner,
+        )

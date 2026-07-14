@@ -2,132 +2,200 @@
 
 import { create } from "zustand";
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string | null;
+import {
+  LocalStorage,
+  StorageKeys,
+} from "../lib/storage";
 
-  isPro: boolean;
-
-  createdAt?: string;
-}
+import {
+  authService,
+  AuthUser,
+} from "../services/auth/authService";
 
 interface AuthState {
-  /* ==========================================
-     Authentication
-  ========================================== */
-
-  user: User | null;
-
-  accessToken: string | null;
-
-  refreshToken: string | null;
+  user: AuthUser | null;
 
   authenticated: boolean;
 
   loading: boolean;
 
-  /* ==========================================
-     Actions
-  ========================================== */
+  initialize: () => Promise<void>;
 
   login: (
-    user: User,
-    accessToken: string,
-    refreshToken: string
-  ) => void;
+    email: string,
+    password: string
+  ) => Promise<AuthUser>;
 
-  logout: () => void;
+  register: (
+    full_name: string,
+    email: string,
+    password: string
+  ) => Promise<any>;
 
-  updateUser: (
-    user: Partial<User>
-  ) => void;
+  logout: () => Promise<void>;
 
-  setLoading: (
-    loading: boolean
-  ) => void;
+  setUser: (user: AuthUser | null) => void;
 
-  setAccessToken: (
-    token: string
-  ) => void;
-
-  setRefreshToken: (
-    token: string
-  ) => void;
-
-  reset: () => void;
+  setLoading: (loading: boolean) => void;
 }
 
-const initialState = {
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-
-  accessToken: null,
-
-  refreshToken: null,
 
   authenticated: false,
 
   loading: false,
-};
 
-export const useAuthStore =
-  create<AuthState>((set) => ({
-    ...initialState,
+  initialize: async () => {
+    set({ loading: true });
 
-    login: (
-      user,
-      accessToken,
-      refreshToken
-    ) =>
+    try {
+      const authenticated =
+        await authService.isAuthenticated();
+
+      if (!authenticated) {
+        set({
+          user: null,
+          authenticated: false,
+          loading: false,
+        });
+        return;
+      }
+
+      const storedUser =
+        await LocalStorage.get<AuthUser>(
+          StorageKeys.USER
+        );
+
+      if (storedUser) {
+        set({
+          user: storedUser,
+          authenticated: true,
+          loading: false,
+        });
+        return;
+      }
+
+      const user =
+        await authService.getCurrentUser();
+
+      await LocalStorage.set(
+        StorageKeys.USER,
+        user
+      );
+
       set({
         user,
-        accessToken,
-        refreshToken,
         authenticated: true,
         loading: false,
-      }),
+      });
+    } catch (err) {
+  console.log(err);
 
-    logout: () =>
+  await authService.logout();
+
+  await LocalStorage.remove(
+    StorageKeys.USER
+  );
+
+  set({
+    user: null,
+    authenticated: false,
+    loading: false,
+  });
+}
+  },
+
+  login: async (email, password) => {
+  set({ loading: true });
+
+  try {
+    console.log("STORE 1");
+
+    const response = await authService.login({
+      email,
+      password,
+    });
+
+    console.log("STORE 2", response);
+
+    await LocalStorage.set(
+      StorageKeys.USER,
+      response.user
+    );
+
+    console.log("STORE 3");
+
+    set({
+      user: response.user,
+      authenticated: true,
+      loading: false,
+    });
+
+    console.log("STORE 4");
+
+    return response.user;
+  } catch (err) {
+    console.log("STORE ERROR", err);
+
+    set({
+      loading: false,
+    });
+
+    throw err;
+  }
+},
+
+  register: async (
+    full_name,
+    email,
+    password
+  ) => {
+    set({ loading: true });
+
+    try {
+      const user =
+        await authService.register({
+          full_name,
+          username: email.split("@")[0],
+          email,
+          password,
+        });
+
       set({
-        ...initialState,
-      }),
+        loading: false,
+      });
 
-    updateUser: (user) =>
-      set((state) => ({
-        user: state.user
-          ? {
-              ...state.user,
-              ...user,
-            }
-          : null,
-      })),
+      return user;
+    } catch (err) {
+      set({ loading: false });
+      throw err;
+    }
+  },
 
-    setLoading: (
-      loading
-    ) =>
-      set({
-        loading,
-      }),
+  logout: async () => {
+    await authService.logout();
 
-    setAccessToken: (
-      accessToken
-    ) =>
-      set({
-        accessToken,
-      }),
+    await LocalStorage.remove(
+      StorageKeys.USER
+    );
 
-    setRefreshToken: (
-      refreshToken
-    ) =>
-      set({
-        refreshToken,
-      }),
+    set({
+      user: null,
+      authenticated: false,
+      loading: false,
+    });
+  },
 
-    reset: () =>
-      set({
-        ...initialState,
-      }),
-  }));
+  setUser: (user) =>
+    set({
+      user,
+      authenticated: !!user,
+    }),
 
-export default useAuthStore;
+  setLoading: (loading) =>
+    set({
+      loading,
+    }),
+}));
+

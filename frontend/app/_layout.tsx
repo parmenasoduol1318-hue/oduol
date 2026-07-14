@@ -11,21 +11,34 @@ import Colors from "../constants/colors";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { initialize } = useAuthStore();
+  const initialize = useAuthStore(
+    (state) => state.initialize
+  );
 
   useEffect(() => {
+    let mounted = true;
+
     async function prepare() {
       try {
-        await initialize();
+        if (mounted) {
+          await initialize();
+        }
       } catch (error) {
-        console.log("Initialization Error:", error);
+        console.error(
+          "App initialization error:",
+          error
+        );
       } finally {
         await SplashScreen.hideAsync();
       }
     }
 
     prepare();
-  }, []);
+
+    return () => {
+      mounted = false;
+    };
+  }, [initialize]);
 
   return (
     <>
@@ -40,8 +53,10 @@ export default function RootLayout() {
           },
         }}
       >
-        {/* Authentication */}
+        {/* Root */}
+        <Stack.Screen name="index" />
 
+        {/* Authentication */}
         <Stack.Screen name="auth/login" />
         <Stack.Screen name="auth/register" />
         <Stack.Screen name="auth/forgot-password" />
@@ -49,22 +64,18 @@ export default function RootLayout() {
         <Stack.Screen name="auth/verify-email" />
 
         {/* Onboarding */}
-
         <Stack.Screen name="onboarding/index" />
 
         {/* Main App */}
-
         <Stack.Screen name="(tabs)" />
 
         {/* Chat */}
-
         <Stack.Screen
           name="chat/[id]"
           options={{
             animation: "slide_from_right",
           }}
         />
-
         <Stack.Screen
           name="chat/new"
           options={{
@@ -73,7 +84,6 @@ export default function RootLayout() {
         />
 
         {/* Payments */}
-
         <Stack.Screen name="payments/index" />
         <Stack.Screen name="payments/plans" />
         <Stack.Screen name="payments/mpesa" />
@@ -82,7 +92,6 @@ export default function RootLayout() {
         <Stack.Screen name="payments/failed" />
 
         {/* Subscription */}
-
         <Stack.Screen name="subscription/index" />
         <Stack.Screen name="subscription/upgrade" />
         <Stack.Screen name="subscription/manage" />
