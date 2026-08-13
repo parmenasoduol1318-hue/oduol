@@ -1,7 +1,8 @@
 // frontend/hooks/useNotifications.ts
 
 import { useEffect, useState } from "react";
-import { get, post } from "../lib/api";
+import { api } from "../services/api/client";
+import API_ENDPOINTS from "../services/api/endpoints";
 import { getCache, setCache } from "../lib/cache";
 import { STORAGE_KEYS } from "../lib/constants";
 
@@ -24,14 +25,11 @@ export function useNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  /**
-   * Load notifications from backend
-   */
   const fetchNotifications = async () => {
     try {
       setLoading(true);
 
-      const data = await get<NotificationItem[]>("/api/notifications");
+      const data = await api.get<NotificationItem[]>(API_ENDPOINTS.NOTIFICATIONS.LIST);
 
       setItems(data);
 
@@ -42,7 +40,6 @@ export function useNotifications() {
     } catch (err) {
       console.error("Failed to fetch notifications", err);
 
-      // fallback to cache
       const cached = getCache<NotificationItem[]>(
         STORAGE_KEYS.SETTINGS + "_notifications"
       );
@@ -56,12 +53,9 @@ export function useNotifications() {
     }
   };
 
-  /**
-   * Mark notification as read
-   */
   const markAsRead = async (id: string) => {
     try {
-      await post(`/api/notifications/${id}/read`);
+      await api.patch(API_ENDPOINTS.NOTIFICATIONS.READ(id));
 
       setItems((prev) =>
         prev.map((n) =>
@@ -75,12 +69,9 @@ export function useNotifications() {
     }
   };
 
-  /**
-   * Mark all as read
-   */
   const markAllAsRead = async () => {
     try {
-      await post("/api/notifications/mark-all-read");
+      await api.patch(API_ENDPOINTS.NOTIFICATIONS.READ_ALL);
 
       setItems((prev) =>
         prev.map((n) => ({ ...n, is_read: true }))
@@ -92,9 +83,6 @@ export function useNotifications() {
     }
   };
 
-  /**
-   * Refresh notifications
-   */
   const refresh = () => {
     fetchNotifications();
   };

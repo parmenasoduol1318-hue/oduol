@@ -14,11 +14,21 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface SocialLoginRequest {
+  provider: "google" | "github";
+  token: string;
+}
+
 export interface AuthUser {
   id: number;
   username: string;
   full_name: string;
+  name?: string;
   email: string;
+  avatar?: string | null;
+  phone_number?: string | null;
+  profile_picture?: string | null;
+  auth_provider?: string;
   is_active: boolean;
   is_verified: boolean;
   is_admin: boolean;
@@ -58,8 +68,41 @@ export class AuthService {
     return response;
   }
 
+  async loginWithGoogle(token: string): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>(
+      "/auth/social-login",
+      { provider: "google", token }
+    );
+
+    if (!response?.access_token) throw new Error("Google login failed.");
+
+    await tokenService.saveSession(
+      response.access_token,
+      response.refresh_token,
+      response.user.id
+    );
+
+    return response;
+  }
+
   async register(payload: RegisterRequest) {
     return api.post(API_ENDPOINTS.AUTH.REGISTER, payload);
+  }
+
+  async forgotPassword(email: string) {
+    return api.post("/auth/forgot-password", { email });
+  }
+
+  async resetPassword(payload: { token: string; password: string }) {
+    return api.post("/auth/reset-password", payload);
+  }
+
+  async changePassword(payload: { current_password: string; new_password: string }) {
+    return api.post("/auth/change-password", payload);
+  }
+
+  async verifyEmail(token: string) {
+    return api.post("/auth/verify-email", { token });
   }
 
   async getCurrentUser() {
@@ -67,8 +110,6 @@ export class AuthService {
   }
 
   async logout() {
-    // Only clear local session.
-    // No backend request required.
     await tokenService.clearTokens();
   }
 

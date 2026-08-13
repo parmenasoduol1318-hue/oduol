@@ -16,7 +16,7 @@ import { Link, Stack, router } from "expo-router";
 import { useAuthStore } from "@/store/authStore";
 
 export default function RegisterScreen() {
-  const register = useAuthStore((state) => state.register);
+  const register = useAuthStore((state: ReturnType<typeof useAuthStore.getState>) => state.register);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import api from "../lib/api";
+import { api } from "../services/api/client";
+import API_ENDPOINTS from "../services/api/endpoints";
 import { logger } from "../lib/logger";
 
 export interface ChatMessage {
@@ -26,9 +27,7 @@ export const useChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [conversationId, setConversationId] = useState<string | undefined>(
-    undefined
-  );
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
   const addMessage = useCallback((msg: ChatMessage) => {
     setMessages((prev) => [...prev, msg]);
@@ -47,25 +46,36 @@ export const useChat = () => {
       addMessage(userMessage);
 
       try {
-        const res = await api.post<SendMessageResponse>("/chat/send", {
-          message: text,
-          conversationId,
-        } as SendMessageRequest);
+        const res = await api.post<{ response?: string; chat_id?: number; message?: string }>(
+          API_ENDPOINTS.AI.CHAT,
+          {
+            prompt: text,
+            chat_id: conversationId ? Number(conversationId) : undefined,
+            temperature: 0.7,
+          } as unknown as SendMessageRequest
+        );
 
-        if (res.data.reply) {
+        const reply = res.response ?? res.message ?? "";
+
+        if (reply) {
           const assistantMessage: ChatMessage = {
             role: "assistant",
-            content: res.data.reply,
+            content: reply,
           };
 
           addMessage(assistantMessage);
         }
 
-        if (res.data.conversationId) {
-          setConversationId(res.data.conversationId);
+        if (res.chat_id) {
+          setConversationId(String(res.chat_id));
         }
 
-        return res.data;
+        return {
+          success: true,
+          message: "Chat response received",
+          conversationId: res.chat_id ? String(res.chat_id) : undefined,
+          reply,
+        } as SendMessageResponse;
       } catch (err: any) {
         const message =
           err?.response?.data?.detail ||

@@ -83,7 +83,7 @@ export default function ImagesScreen() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Image
-              source={{ uri: item.image_url }}
+              source={{ uri: item.imageUrl }}
               style={styles.image}
               resizeMode="cover"
             />

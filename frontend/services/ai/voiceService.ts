@@ -1,10 +1,7 @@
 // frontend/services/ai/voiceService.ts
 
-import axios, { AxiosInstance } from "axios";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://swiftreply-njbt.onrender.com";
+import { api } from "../api/client";
+import API_ENDPOINTS from "../api/endpoints";
 
 /* ======================================================
    Types
@@ -41,117 +38,28 @@ export interface ApiResponse<T = unknown> {
 ====================================================== */
 
 class VoiceService {
-  private api: AxiosInstance;
-
-  constructor() {
-    this.api = axios.create({
-      baseURL: API_URL,
-      timeout: 60000,
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
+  async transcribeAudio(audio: FormData) {
+    return api.post(API_ENDPOINTS.AI.SPEECH_TO_TEXT, audio, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
   }
 
-  /* ==========================================
-     Authentication
-  ========================================== */
-
-  setAccessToken(token: string) {
-    this.api.defaults.headers.common.Authorization =
-      `Bearer ${token}`;
+  async textToSpeech(payload: TextToSpeechRequest) {
+    return api.post(API_ENDPOINTS.AI.TEXT_TO_SPEECH, payload);
   }
 
-  clearAccessToken() {
-    delete this.api.defaults.headers.common.Authorization;
+  async sendVoiceMessage(payload: VoiceChatRequest) {
+    return api.post(API_ENDPOINTS.VOICE.CONVERSATION, payload);
   }
 
-  /* ==========================================
-     Speech-to-Text
-  ========================================== */
-
-  async transcribeAudio(
-    audio: FormData
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse<SpeechToTextResponse>
-      >(
-        "/api/voice/transcribe",
-        audio,
-        {
-          headers: {
-            "Content-Type":
-              "multipart/form-data",
-          },
-        }
-      );
-
-    return response.data;
-  }
-
-  /* ==========================================
-     Text-to-Speech
-  ========================================== */
-
-  async textToSpeech(
-    payload: TextToSpeechRequest
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse<{
-          audio_url: string;
-        }>
-      >(
-        "/api/voice/speak",
-        payload
-      );
-
-    return response.data;
-  }
-
-  /* ==========================================
-     Voice Conversation
-  ========================================== */
-
-  async sendVoiceMessage(
-    payload: VoiceChatRequest
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse<VoiceChatResponse>
-      >(
-        "/api/voice/chat",
-        payload
-      );
-
-    return response.data;
-  }
-
-  /* ==========================================
-     End Voice Session
-  ========================================== */
-
-  async endVoiceSession(
-    conversationId: string
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse
-      >(
-        "/api/voice/end",
-        {
-          conversation_id:
-            conversationId,
-        }
-      );
-
-    return response.data;
+  async endVoiceSession(conversationId: string) {
+    return api.post(API_ENDPOINTS.VOICE.CONVERSATION, {
+      conversation_id: conversationId,
+      action: "end",
+    });
   }
 }
 
-const voiceService =
-  new VoiceService();
+const voiceService = new VoiceService();
 
 export default voiceService;

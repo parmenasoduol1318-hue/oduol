@@ -47,8 +47,8 @@ export default function AppInput({
       <View
         style={[
           styles.inputContainer,
-          focused && styles.focused,
-          error && styles.errorBorder,
+          focused ? styles.focused : null,
+          error ? styles.errorBorder : null,
         ]}
       >
         {icon && (

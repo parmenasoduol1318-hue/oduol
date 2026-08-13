@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import api from "../lib/api";
+import { apiClient } from "../services/api/client";
 import { logger } from "../lib/logger";
 
 export interface ApiState<T> {
@@ -17,21 +17,21 @@ export const useApi = <T,>() => {
 
   const request = useCallback(
     async <R = T>(
-      method: "get" | "post" | "put" | "delete",
+      method: "get" | "post" | "put" | "delete" | "patch",
       url: string,
       body?: any
     ): Promise<R | null> => {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
-        const response = await api.request<R>({
+        const response = await apiClient.request<R>({
           method,
           url,
           data: body,
         });
 
         setState({
-          data: response.data as any,
+          data: response.data as unknown as T,
           loading: false,
           error: null,
         });

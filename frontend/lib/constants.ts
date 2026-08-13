@@ -19,36 +19,39 @@ export const STORAGE_KEYS = {
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: "/api/auth/login",
-    REGISTER: "/api/auth/register",
-    REFRESH: "/api/auth/refresh",
-    ME: "/api/auth/me",
-    LOGOUT: "/api/auth/logout",
+    LOGIN: "/auth/login",
+    REGISTER: "/auth/register",
+    REFRESH: "/auth/refresh",
+    ME: "/auth/me",
+    LOGOUT: "/auth/logout",
   },
 
   USERS: {
-    BASE: "/api/users",
-    ME: "/api/users/me",
+    BASE: "/users",
+    ME: "/users/me",
   },
 
   CHAT: {
-    BASE: "/api/chats",
-    MESSAGES: "/api/messages",
+    BASE: "/chats",
+    MESSAGES: "/messages",
   },
 
   AI: {
-    CHAT: "/api/ai/chat",
-    IMAGE: "/api/ai/image",
-    VOICE: "/api/ai/voice",
+    CHAT: "/ai/chat",
+    IMAGE: "/ai/image",
+    VOICE: "/ai/voice",
   },
 
   PAYMENTS: {
-    MPESA_STK: "/api/payments/mpesa/stkpush",
-    MPESA_CALLBACK: "/api/payments/mpesa/callback",
+    CREATE: "/payments",
+    VERIFY: "/payments/verify",
+    HISTORY: "/payments/history",
+    MPESA_CALLBACK: "/payments/mpesa/callback",
+    PAYPAL_WEBHOOK: "/payments/paypal/webhook",
   },
 
   ANALYTICS: {
-    BASE: "/api/analytics",
+    BASE: "/analytics",
   },
 };
 

@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import api from "../lib/api";
+import { api } from "../services/api/client";
+import API_ENDPOINTS from "../services/api/endpoints";
 import { logger } from "../lib/logger";
 
 export interface ImageGenerationRequest {
@@ -24,14 +25,19 @@ export const useImageGeneration = () => {
     setError(null);
 
     try {
-      const res = await api.post<ImageGenerationResponse>(
-        "/ai/image/generate",
+      const res = await api.post<{ image_url?: string; image?: string }>(
+        API_ENDPOINTS.IMAGES.GENERATE,
         payload
       );
 
-      setImages(res.data.images || []);
+      const imageUrl = res.image_url ?? res.image ?? "";
+      setImages(imageUrl ? [imageUrl] : []);
 
-      return res.data;
+      return {
+        success: true,
+        images: imageUrl ? [imageUrl] : [],
+        message: "Image generated successfully",
+      } as ImageGenerationResponse;
     } catch (err: any) {
       const message =
         err?.response?.data?.detail ||

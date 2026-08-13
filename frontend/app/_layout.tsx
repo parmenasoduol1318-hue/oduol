@@ -12,7 +12,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const initialize = useAuthStore(
-    (state) => state.initialize
+    (state: ReturnType<typeof useAuthStore.getState>) => state.initialize
   );
 
   useEffect(() => {

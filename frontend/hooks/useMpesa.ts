@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import api from "../lib/api";
+import { api } from "../services/api/client";
+import API_ENDPOINTS from "../services/api/endpoints";
 import { logger } from "../lib/logger";
 
 export interface MpesaPaymentRequest {
@@ -31,12 +32,14 @@ export const useMpesa = () => {
     setError(null);
 
     try {
-      const res = await api.post<MpesaPaymentResponse>(
-        "/payments/mpesa/stkpush",
-        payload
-      );
+      const res = await api.post<MpesaPaymentResponse>(API_ENDPOINTS.PAYMENTS.CREATE, {
+        amount: payload.amount,
+        currency: "KES",
+        provider: "MPESA",
+        phone_number: payload.phone,
+      });
 
-      return res.data;
+      return res;
     } catch (err: any) {
       const message =
         err?.response?.data?.detail ||
@@ -44,7 +47,7 @@ export const useMpesa = () => {
         "Failed to initiate M-Pesa payment";
 
       setError(message);
-      logger.error("M-Pesa STK Push failed", err);
+      logger.error("M-Pesa payment failed", err);
 
       return {
         success: false,
@@ -57,11 +60,9 @@ export const useMpesa = () => {
 
   const checkStatus = useCallback(async (checkoutRequestId: string) => {
     try {
-      const res = await api.get<MpesaStatusResponse>(
-        `/payments/mpesa/status/${checkoutRequestId}`
-      );
+      const res = await api.get<MpesaStatusResponse>(API_ENDPOINTS.PAYMENTS.DETAILS(checkoutRequestId));
 
-      return res.data;
+      return res;
     } catch (err: any) {
       const message =
         err?.response?.data?.detail ||

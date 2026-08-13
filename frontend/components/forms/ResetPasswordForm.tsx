@@ -76,7 +76,7 @@ export default function ResetPasswordForm() {
 
       await authService.resetPassword({
         token: token.trim(),
-        new_password: password,
+        password,
       });
 
       Alert.alert(

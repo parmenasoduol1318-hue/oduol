@@ -17,7 +17,7 @@ import { useAuthStore } from "../store/authStore";
 import aiService from "../services/ai/aiService";
 
 export default function ChatScreen() {
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore((state: ReturnType<typeof useAuthStore.getState>) => state.user);
 
   const {
     chats,
@@ -32,23 +32,20 @@ export default function ChatScreen() {
     useState(false);
 
   useEffect(() => {
-    if (!currentChatId) {
-      const chatId =
-        Date.now().toString();
+    if (currentChatId === null || currentChatId === undefined) {
+      const chatId = String(Date.now());
 
       addChat({
         id: chatId,
         title: "New Chat",
         messages: [],
-        createdAt:
-          new Date().toISOString(),
-        updatedAt:
-          new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       setCurrentChat(chatId);
     }
-  }, []);
+  }, [addChat, currentChatId, setCurrentChat]);
 
   const currentChat = chats.find(
     (c) => c.id === currentChatId
@@ -79,19 +76,15 @@ export default function ChatScreen() {
     try {
       const response =
         await aiService.chat({
-          message: prompt,
-          chat_id: currentChatId,
+          prompt,
+          chat_id: Number(currentChatId),
         });
 
       addMessage(currentChatId, {
-        id:
-          Date.now().toString() +
-          "_assistant",
+        id: Number(Date.now().toString() + "_assistant".replace(/[^0-9]/g, "")) || Date.now(),
         role: "assistant",
-        content:
-          response.data.reply,
-        createdAt:
-          new Date().toISOString(),
+        content: response.response ?? "",
+        createdAt: new Date().toISOString(),
       });
     } catch (error) {
       addMessage(currentChatId, {
@@ -137,7 +130,7 @@ export default function ChatScreen() {
           []
         }
         keyExtractor={(item) =>
-          item.id
+          String(item.id)
         }
         contentContainerStyle={{
           padding: 16,

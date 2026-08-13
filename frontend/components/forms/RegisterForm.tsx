@@ -16,7 +16,7 @@ import Colors from "../../constants/colors";
 import { useAuthStore } from "../../store/authStore";
 
 export default function RegisterForm() {
-  const register = useAuthStore((state) => state.register);
+  const register = useAuthStore((state: ReturnType<typeof useAuthStore.getState>) => state.register);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -83,11 +83,7 @@ export default function RegisterForm() {
     try {
       setLoading(true);
 
-      await register({
-        full_name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password,
-      });
+      await register(name.trim(), email.trim().toLowerCase(), password);
 
       router.replace("/auth/verify-email");
     } catch (error: any) {

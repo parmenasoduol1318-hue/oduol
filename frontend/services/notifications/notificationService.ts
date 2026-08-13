@@ -106,9 +106,9 @@ class NotificationService {
         data,
       },
       trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+        type: "timeInterval",
         seconds,
-      },
+      } as any,
     });
   }
 

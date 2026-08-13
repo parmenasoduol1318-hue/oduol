@@ -55,12 +55,12 @@ export default function Skeleton({
       style={[
         styles.skeleton,
         {
-          width,
+          width: width as any,
           height,
           borderRadius,
           opacity,
         },
-        style,
+        style as any,
       ]}
     />
   );

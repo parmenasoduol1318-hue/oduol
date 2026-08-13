@@ -1,10 +1,7 @@
 // frontend/services/payments/paymentService.ts
 
-import axios, { AxiosInstance } from "axios";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "https://swiftreply-njbt.onrender.com";
+import { api } from "../api/client";
+import API_ENDPOINTS from "../api/endpoints";
 
 export interface MpesaSTKPushRequest {
   phone_number: string;
@@ -22,119 +19,52 @@ export interface ApiResponse<T = unknown> {
 }
 
 class PaymentService {
-  private api: AxiosInstance;
-
-  constructor() {
-    this.api = axios.create({
-      baseURL: API_URL,
-      timeout: 30000,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  async createPayment(payload: { amount: number; currency?: string; provider: string }) {
+    return api.post(API_ENDPOINTS.PAYMENTS.CREATE, payload);
   }
 
-  /**
-   * Sets the Authorization header for authenticated requests.
-   */
-  setAccessToken(token: string) {
-    this.api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  async payWithMpesa(payload: { phone_number: string; plan_id?: string; amount?: number }) {
+    return api.post("/payments/mpesa", payload);
   }
 
-  /**
-   * Removes the Authorization header.
-   */
-  clearAccessToken() {
-    delete this.api.defaults.headers.common.Authorization;
+  async payWithPaypal(payload: { plan_id?: string; amount?: number }) {
+    return api.post("/payments/paypal", payload);
   }
 
-  /* ======================================================
-     M-Pesa
-  ====================================================== */
-
-  async initiateMpesaSTKPush(
-    payload: MpesaSTKPushRequest
-  ) {
-    const response =
-      await this.api.post<ApiResponse>(
-        "/api/payments/mpesa/stkpush",
-        payload
-      );
-
-    return response.data;
+  async verifyPayment(payload: { transaction_id: string }) {
+    return api.post(API_ENDPOINTS.PAYMENTS.VERIFY, payload);
   }
 
-  async getMpesaPaymentStatus(
-    checkoutRequestId: string
-  ) {
-    const response =
-      await this.api.get<ApiResponse>(
-        `/api/payments/mpesa/status/${checkoutRequestId}`
-      );
-
-    return response.data;
+  async getPaymentHistory() {
+    return api.get(API_ENDPOINTS.PAYMENTS.HISTORY);
   }
 
-  /* ======================================================
-     PayPal
-  ====================================================== */
-
-  async createPaypalOrder(
-    payload: PaypalCreateOrderRequest
-  ) {
-    const response =
-      await this.api.post<ApiResponse>(
-        "/api/payments/paypal/create-order",
-        payload
-      );
-
-    return response.data;
+  async getPaymentDetails(paymentId: number | string) {
+    return api.get(API_ENDPOINTS.PAYMENTS.DETAILS(paymentId));
   }
-
-  async capturePaypalOrder(
-    orderId: string
-  ) {
-    const response =
-      await this.api.post<ApiResponse>(
-        `/api/payments/paypal/capture/${orderId}`
-      );
-
-    return response.data;
-  }
-
-  /* ======================================================
-     Subscription
-  ====================================================== */
 
   async getSubscriptionStatus() {
-    const response =
-      await this.api.get<ApiResponse>(
-        "/api/subscription/me"
-      );
+    return api.get(API_ENDPOINTS.SUBSCRIPTIONS.CURRENT);
+  }
 
-    return response.data;
+  async createSubscription(payload: { plan: string; provider: string }) {
+    return api.post(API_ENDPOINTS.SUBSCRIPTIONS.CREATE, payload);
+  }
+
+  async upgradeSubscription(payload: { plan?: string; provider?: string }) {
+    return api.put(API_ENDPOINTS.SUBSCRIPTIONS.UPGRADE, payload);
   }
 
   async cancelSubscription() {
-    const response =
-      await this.api.post<ApiResponse>(
-        "/api/subscription/cancel"
-      );
-
-    return response.data;
+    return api.delete(API_ENDPOINTS.SUBSCRIPTIONS.CANCEL);
   }
 
-  /* ======================================================
-     Payment History
-  ====================================================== */
+  async renewSubscription() {
+    return api.post(API_ENDPOINTS.SUBSCRIPTIONS.RENEW);
+  }
 
-  async getPaymentHistory() {
-    const response =
-      await this.api.get<ApiResponse>(
-        "/api/payments/history"
-      );
-
-    return response.data;
+  async getSubscriptionHistory() {
+    return api.get(API_ENDPOINTS.SUBSCRIPTIONS.HISTORY);
   }
 }
 

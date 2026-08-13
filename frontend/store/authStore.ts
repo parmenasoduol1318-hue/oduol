@@ -26,11 +26,17 @@ interface AuthState {
     password: string
   ) => Promise<AuthUser>;
 
+  loginWithGoogle: (token: string) => Promise<AuthUser>;
+
   register: (
     full_name: string,
     email: string,
     password: string
   ) => Promise<any>;
+
+  updateProfile: (updates: Partial<AuthUser> & { full_name?: string; email?: string; phone_number?: string }) => Promise<AuthUser | null>;
+
+  isAuthenticated: () => boolean;
 
   logout: () => Promise<void>;
 
@@ -39,7 +45,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
 
   authenticated: false,
@@ -107,44 +113,48 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   login: async (email, password) => {
-  set({ loading: true });
+    set({ loading: true });
 
-  try {
-    console.log("STORE 1");
+    try {
+      const response = await authService.login({
+        email,
+        password,
+      });
 
-    const response = await authService.login({
-      email,
-      password,
-    });
+      await LocalStorage.set(StorageKeys.USER, response.user);
 
-    console.log("STORE 2", response);
+      set({
+        user: response.user,
+        authenticated: true,
+        loading: false,
+      });
 
-    await LocalStorage.set(
-      StorageKeys.USER,
-      response.user
-    );
+      return response.user;
+    } catch (err) {
+      set({ loading: false });
+      throw err;
+    }
+  },
 
-    console.log("STORE 3");
+  loginWithGoogle: async (token) => {
+    set({ loading: true });
 
-    set({
-      user: response.user,
-      authenticated: true,
-      loading: false,
-    });
+    try {
+      const response = await authService.loginWithGoogle(token);
+      await LocalStorage.set(StorageKeys.USER, response.user);
 
-    console.log("STORE 4");
+      set({
+        user: response.user,
+        authenticated: true,
+        loading: false,
+      });
 
-    return response.user;
-  } catch (err) {
-    console.log("STORE ERROR", err);
-
-    set({
-      loading: false,
-    });
-
-    throw err;
-  }
-},
+      return response.user;
+    } catch (err) {
+      set({ loading: false });
+      throw err;
+    }
+  },
 
   register: async (
     full_name,
@@ -171,6 +181,30 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ loading: false });
       throw err;
     }
+  },
+
+  updateProfile: async (updates) => {
+    set({ loading: true });
+
+    try {
+      const current = await LocalStorage.get<AuthUser>(StorageKeys.USER);
+      const merged = {
+        ...(current ?? {}),
+        ...(updates as Partial<AuthUser>),
+      } as AuthUser;
+
+      await LocalStorage.set(StorageKeys.USER, merged);
+      set({ user: merged, authenticated: true, loading: false });
+      return merged;
+    } catch (err) {
+      set({ loading: false });
+      throw err;
+    }
+  },
+
+  isAuthenticated: () => {
+    const state = get();
+    return state.authenticated || !!state.user;
   },
 
   logout: async () => {

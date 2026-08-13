@@ -41,13 +41,15 @@ export default function PaypalForm({
           plan_id: planId,
         });
 
-      if (response.checkout_url) {
+      const paypalResponse = response as { checkout_url?: string };
+
+      if (paypalResponse.checkout_url) {
         setSuccess(
           "Redirecting to PayPal..."
         );
 
         await Linking.openURL(
-          response.checkout_url
+          paypalResponse.checkout_url
         );
 
         onSuccess?.();

@@ -1,8 +1,8 @@
 // frontend/hooks/useSubscription.ts
 
 import { useEffect, useState } from "react";
-import { get, post } from "../lib/api";
-import ENV from "../lib/env";
+import { api } from "../services/api/client";
+import API_ENDPOINTS from "../services/api/endpoints";
 import { STORAGE_KEYS } from "../lib/constants";
 import { getCache, setCache } from "../lib/cache";
 
@@ -12,9 +12,6 @@ export type SubscriptionStatus = {
   expires_at?: string | null;
 };
 
-/**
- * Hook to manage PRO subscription state
- */
 export function useSubscription() {
   const [status, setStatus] = useState<SubscriptionStatus>({
     is_pro: false,
@@ -24,21 +21,26 @@ export function useSubscription() {
 
   const [loading, setLoading] = useState(true);
 
-  /**
-   * Fetch subscription from backend
-   */
   const fetchSubscription = async () => {
     try {
       setLoading(true);
 
-      const data = await get<SubscriptionStatus>("/api/subscriptions/me");
+      const data = await api.get<{ status?: string; plan?: string; expires_at?: string | null; is_pro?: boolean }>(
+        API_ENDPOINTS.SUBSCRIPTIONS.CURRENT
+      );
 
-      setStatus(data);
+      const normalized: SubscriptionStatus = {
+        is_pro: Boolean(data?.is_pro || data?.status === "active" || data?.plan === "pro"),
+        plan: (data?.plan as SubscriptionStatus["plan"]) ?? "free",
+        expires_at: data?.expires_at ?? null,
+      };
 
-      // cache locally
+      setStatus(normalized);
+
+      const cached = getCache<Record<string, unknown>>(STORAGE_KEYS.USER) ?? {};
       setCache(STORAGE_KEYS.USER, {
-        ...getCache(STORAGE_KEYS.USER),
-        subscription: data,
+        ...(cached as Record<string, unknown>),
+        subscription: normalized,
       });
     } catch (err) {
       console.error("Failed to fetch subscription", err);
@@ -47,19 +49,13 @@ export function useSubscription() {
     }
   };
 
-  /**
-   * Trigger M-Pesa STK Push
-   */
-  const subscribe = async (phone: string) => {
-    return post("/api/payments/mpesa/stkpush", {
-      phone,
-      plan: "pro",
+  const subscribe = async (provider: string = "MPESA", plan: string = "pro") => {
+    return api.post(API_ENDPOINTS.SUBSCRIPTIONS.CREATE, {
+      plan,
+      provider,
     });
   };
 
-  /**
-   * Check if user has PRO access
-   */
   const isPro = status.is_pro === true;
 
   useEffect(() => {

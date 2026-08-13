@@ -10,7 +10,7 @@ import {
 import ImagePrompt from "./ImagePrompt";
 import ImagePreview from "./ImagePreview";
 
-import imageService from "../../services/image/imageService";
+import imageService from "../../services/ai/imageService";
 
 export default function ImageGenerator() {
   const [prompt, setPrompt] = useState("");
@@ -38,9 +38,8 @@ export default function ImageGenerator() {
           prompt,
         });
 
-      setImageUrl(
-        response.image_url
-      );
+      const payload = response as { image_url?: string; url?: string };
+      setImageUrl(payload.image_url ?? payload.url ?? null);
     } catch (error: any) {
       Alert.alert(
         "Generation Failed",

@@ -19,11 +19,13 @@ export default function ChatScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const {
-    messages,
+    chats,
     loading,
     fetchMessages,
     sendMessage,
   } = useChatStore();
+
+  const messages = chats.find((chat) => String(chat.id) === String(id))?.messages ?? [];
 
   const [prompt, setPrompt] = useState("");
 

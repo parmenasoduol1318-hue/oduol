@@ -23,10 +23,10 @@ export default function HistoryScreen() {
     fetchChats();
   }, []);
 
-  const sortedChats = [...chats].sort((a: any, b: any) => {
+  const sortedChats = [...chats].sort((a, b) => {
     return (
-      new Date(b.updated_at || b.created_at).getTime() -
-      new Date(a.updated_at || a.created_at).getTime()
+      new Date(b.updatedAt || b.createdAt).getTime() -
+      new Date(a.updatedAt || a.createdAt).getTime()
     );
   });
 
@@ -89,7 +89,7 @@ export default function HistoryScreen() {
 
               <Text style={styles.date}>
                 {new Date(
-                  item.updated_at || item.created_at
+                  item.updatedAt || item.createdAt
                 ).toLocaleString()}
               </Text>
             </View>

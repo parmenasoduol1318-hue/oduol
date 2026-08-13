@@ -47,7 +47,7 @@ export default function MessageActions({
         return;
       }
 
-      if (await Sharing.isAvailableAsync()) {
+      if (typeof (Sharing as any).isAvailableAsync === "function" && (await (Sharing as any).isAvailableAsync())) {
         Alert.alert(
           "Share",
           "Sharing from raw text will be implemented with exported files."

@@ -21,6 +21,19 @@ class AIService:
         self.chat_service = ChatService()
 
     # =========================================================
+    # Compatibility wrappers for legacy tests and older callers
+    # =========================================================
+
+    async def smart_reply(self, message: str):
+        return await self.workflows.chat(message)
+
+    async def write(self, topic: str, style: str = "blog"):
+        return await self.workflows.write_content(topic, style)
+
+    async def plan(self, goal: str):
+        return await self.workflows.plan(goal)
+
+    # =========================================================
     # Chat
     # =========================================================
 

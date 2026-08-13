@@ -1,10 +1,7 @@
 // frontend/services/chat/chatService.ts
 
-import axios, { AxiosInstance } from "axios";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://swiftreply-njbt.onrender.com";
+import { api } from "../api/client";
+import API_ENDPOINTS from "../api/endpoints";
 
 /* ===========================================================
    TYPES
@@ -36,114 +33,32 @@ export interface RenameChatRequest {
 }
 
 class ChatService {
-  private api: AxiosInstance;
-
-  constructor() {
-    this.api = axios.create({
-      baseURL: API_URL,
-      timeout: 30000,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
-
-  /* ===========================================================
-     AUTH
-  =========================================================== */
-
-  setAccessToken(token: string) {
-    this.api.defaults.headers.common[
-      "Authorization"
-    ] = `Bearer ${token}`;
-  }
-
-  clearAccessToken() {
-    delete this.api.defaults.headers.common[
-      "Authorization"
-    ];
-  }
-
-  /* ===========================================================
-     CHATS
-  =========================================================== */
-
   async getChats(): Promise<ChatSession[]> {
-    const response = await this.api.get<ChatSession[]>(
-      "/api/chats"
-    );
-
-    return response.data;
+    return api.get<ChatSession[]>(API_ENDPOINTS.CHATS.LIST);
   }
 
-  async createChat(
-    title = "New Chat"
-  ): Promise<ChatSession> {
-    const response =
-      await this.api.post<ChatSession>(
-        "/api/chats",
-        {
-          title,
-        }
-      );
-
-    return response.data;
+  async createChat(title = "New Chat"): Promise<ChatSession> {
+    return api.post<ChatSession>(API_ENDPOINTS.CHATS.CREATE, { title });
   }
 
-  async getChat(
-    chatId: number
-  ): Promise<ChatSession> {
-    const response =
-      await this.api.get<ChatSession>(
-        `/api/chats/${chatId}`
-      );
-
-    return response.data;
+  async getChat(chatId: number): Promise<ChatSession> {
+    return api.get<ChatSession>(API_ENDPOINTS.CHATS.DETAILS(chatId));
   }
 
-  async renameChat(
-    chatId: number,
-    title: string
-  ): Promise<ChatSession> {
-    const response =
-      await this.api.put<ChatSession>(
-        `/api/chats/${chatId}`,
-        {
-          title,
-        }
-      );
-
-    return response.data;
+  async renameChat(chatId: number, title: string): Promise<ChatSession> {
+    return api.put<ChatSession>(API_ENDPOINTS.CHATS.UPDATE(chatId), { title });
   }
 
-  async deleteChat(
-    chatId: number
-  ): Promise<void> {
-    await this.api.delete(
-      `/api/chats/${chatId}`
-    );
+  async deleteChat(chatId: number): Promise<void> {
+    return api.delete<void>(API_ENDPOINTS.CHATS.DELETE(chatId));
   }
 
-  async archiveChat(
-    chatId: number
-  ): Promise<ChatSession> {
-    const response =
-      await this.api.patch<ChatSession>(
-        `/api/chats/${chatId}/archive`
-      );
-
-    return response.data;
+  async archiveChat(chatId: number): Promise<ChatSession> {
+    return api.patch<ChatSession>(API_ENDPOINTS.CHATS.ARCHIVE(chatId));
   }
 
-  async unarchiveChat(
-    chatId: number
-  ): Promise<ChatSession> {
-    const response =
-      await this.api.patch<ChatSession>(
-        `/api/chats/${chatId}/unarchive`
-      );
-
-    return response.data;
+  async unarchiveChat(chatId: number): Promise<ChatSession> {
+    return api.patch<ChatSession>(API_ENDPOINTS.CHATS.UNARCHIVE(chatId));
   }
 }
 

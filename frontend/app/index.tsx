@@ -11,11 +11,11 @@ import { useAuthStore } from "../store/authStore";
 
 export default function Index() {
   const authenticated = useAuthStore(
-    (state) => state.authenticated
+    (state: ReturnType<typeof useAuthStore.getState>) => state.authenticated
   );
 
   const loading = useAuthStore(
-    (state) => state.loading
+    (state: ReturnType<typeof useAuthStore.getState>) => state.loading
   );
 
   if (loading) {

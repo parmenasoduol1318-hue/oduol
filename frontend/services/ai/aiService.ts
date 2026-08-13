@@ -1,10 +1,7 @@
 // frontend/services/ai/aiService.ts
 
-import axios, { AxiosInstance } from "axios";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://swiftreply-njbt.onrender.com";
+import { api } from "../api/client";
+import API_ENDPOINTS from "../api/endpoints";
 
 /* ======================================================
    Types
@@ -20,19 +17,15 @@ export interface AIModel {
 }
 
 export interface ChatRequest {
-  message: string;
-  chat_id?: string;
-  model?: string;
+  prompt: string;
+  chat_id?: number | null;
   temperature?: number;
-  max_tokens?: number;
-  stream?: boolean;
 }
 
 export interface ChatResponse {
-  reply: string;
-  chat_id: string;
-  message_id?: string;
-  model?: string;
+  response: string;
+  chat_id?: number | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface ApiResponse<T = unknown> {
@@ -46,95 +39,52 @@ export interface ApiResponse<T = unknown> {
 ====================================================== */
 
 class AIService {
-  private api: AxiosInstance;
+  async chat(payload: ChatRequest) {
+    return api.post<ChatResponse>(API_ENDPOINTS.AI.CHAT, payload);
+  }
 
-  constructor() {
-    this.api = axios.create({
-      baseURL: API_URL,
-      timeout: 120000,
-      headers: {
-        "Content-Type": "application/json",
-      },
+  async rewrite(payload: { text: string; tone?: string }) {
+    return api.post(API_ENDPOINTS.AI.REWRITE, payload);
+  }
+
+  async translate(payload: { text: string; target_language: string }) {
+    return api.post(API_ENDPOINTS.AI.TRANSLATE, payload);
+  }
+
+  async summarize(payload: { text: string }) {
+    return api.post(API_ENDPOINTS.AI.SUMMARIZE, payload);
+  }
+
+  async research(payload: { query: string }) {
+    return api.post(API_ENDPOINTS.AI.RESEARCH, payload);
+  }
+
+  async code(payload: { prompt: string; language?: string | null }) {
+    return api.post(API_ENDPOINTS.AI.CODE, payload);
+  }
+
+  async generateImage(payload: { prompt: string; size?: string }) {
+    return api.post(API_ENDPOINTS.AI.IMAGE, payload);
+  }
+
+  async vision(formData: FormData) {
+    return api.post(API_ENDPOINTS.AI.VISION, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
   }
 
-  /* ==========================================
-     Authentication
-  ========================================== */
-
-  setAccessToken(token: string) {
-    this.api.defaults.headers.common.Authorization =
-      `Bearer ${token}`;
+  async speechToText(formData: FormData) {
+    return api.post(API_ENDPOINTS.AI.SPEECH_TO_TEXT, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   }
 
-  clearAccessToken() {
-    delete this.api.defaults.headers.common.Authorization;
+  async textToSpeech(payload: { text: string; voice?: string }) {
+    return api.post(API_ENDPOINTS.AI.TEXT_TO_SPEECH, payload);
   }
 
-  /* ==========================================
-     Chat Completion
-  ========================================== */
-
-  async chat(payload: ChatRequest) {
-    const response =
-      await this.api.post<ApiResponse<ChatResponse>>(
-        "/api/chat/send",
-        payload
-      );
-
-    return response.data;
-  }
-
-  /* ==========================================
-     Models
-  ========================================== */
-
-  async getModels() {
-    const response =
-      await this.api.get<ApiResponse<AIModel[]>>(
-        "/api/models"
-      );
-
-    return response.data;
-  }
-
-  /* ==========================================
-     Health Check
-  ========================================== */
-
-  async getAIStatus() {
-    const response =
-      await this.api.get<ApiResponse>(
-        "/api/ai/status"
-      );
-
-    return response.data;
-  }
-
-  /* ==========================================
-     Stop Generation
-  ========================================== */
-
-  async stopGeneration(chatId: string) {
-    const response =
-      await this.api.post<ApiResponse>(
-        `/api/chat/${chatId}/stop`
-      );
-
-    return response.data;
-  }
-
-  /* ==========================================
-     Regenerate
-  ========================================== */
-
-  async regenerate(chatId: string) {
-    const response =
-      await this.api.post<ApiResponse<ChatResponse>>(
-        `/api/chat/${chatId}/regenerate`
-      );
-
-    return response.data;
+  async getPrompts() {
+    return api.get(API_ENDPOINTS.AI.PROMPTS);
   }
 }
 

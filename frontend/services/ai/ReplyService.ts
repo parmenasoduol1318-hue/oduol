@@ -1,147 +1,61 @@
 // frontend/services/ai/ReplyService.ts
 
-import axios, { AxiosInstance } from "axios";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://swiftreply-njbt.onrender.com";
-
-/* ======================================================
-   Types
-====================================================== */
+import { api } from "./../api/client";
+import API_ENDPOINTS from "../api/endpoints";
 
 export interface ReplyRequest {
-  message: string;
-
+  prompt: string;
   chat_id?: string;
-
   model?: string;
-
   temperature?: number;
-
   max_tokens?: number;
-
   stream?: boolean;
 }
 
 export interface AIReply {
   id?: string;
-
-  reply: string;
-
+  response: string;
   chat_id?: string;
-
   model?: string;
-
   created_at?: string;
 }
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
-
   message: string;
-
   data: T;
 }
 
-/* ======================================================
-   AI Reply Service
-====================================================== */
-
 class ReplyService {
-  private api: AxiosInstance;
-
-  constructor() {
-    this.api = axios.create({
-      baseURL: API_URL,
-      timeout: 120000,
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
-    });
-  }
-
-  /* ==========================================
-     Authentication
-  ========================================== */
-
   setAccessToken(token: string) {
-    this.api.defaults.headers.common.Authorization =
-      `Bearer ${token}`;
+    return token;
   }
 
   clearAccessToken() {
-    delete this.api.defaults.headers.common.Authorization;
+    return undefined;
   }
 
-  /* ==========================================
-     Generate AI Reply
-  ========================================== */
-
-  async generateReply(
-    payload: ReplyRequest
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse<AIReply>
-      >(
-        "/api/chat/reply",
-        payload
-      );
-
-    return response.data;
+  async generateReply(payload: ReplyRequest) {
+    return api.post<{ response?: string; chat_id?: number; metadata?: Record<string, unknown> }>(API_ENDPOINTS.AI.CHAT, {
+      prompt: payload.prompt,
+      chat_id: payload.chat_id ? Number(payload.chat_id) : undefined,
+      temperature: payload.temperature ?? 0.7,
+    });
   }
 
-  /* ==========================================
-     Regenerate Previous Reply
-  ========================================== */
-
-  async regenerateReply(
-    chatId: string
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse<AIReply>
-      >(
-        `/api/chat/${chatId}/regenerate`
-      );
-
-    return response.data;
+  async regenerateReply(chatId: string) {
+    return api.get(API_ENDPOINTS.CHATS.DETAILS(chatId));
   }
 
-  /* ==========================================
-     Stop Generation
-  ========================================== */
-
-  async stopGeneration(
-    chatId: string
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse
-      >(
-        `/api/chat/${chatId}/stop`
-      );
-
-    return response.data;
+  async stopGeneration(chatId: string) {
+    return api.delete(API_ENDPOINTS.CHATS.DETAILS(chatId));
   }
-
-  /* ==========================================
-     Available Models
-  ========================================== */
 
   async getAvailableModels() {
-    const response =
-      await this.api.get<
-        ApiResponse<string[]>
-      >("/api/models");
-
-    return response.data;
+    return api.get(API_ENDPOINTS.AI.PROMPTS);
   }
 }
 
-const replyService =
-  new ReplyService();
+const replyService = new ReplyService();
 
 export default replyService;

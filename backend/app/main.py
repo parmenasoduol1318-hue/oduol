@@ -57,6 +57,12 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
+try:
+    init_db()
+    logger.info("Database initialized at module import.")
+except Exception as exc:
+    logger.exception(f"Initial database initialization failed during app import: {exc}")
+
 
 # ==========================================================
 # CORS

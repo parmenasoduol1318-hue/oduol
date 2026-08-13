@@ -1,4 +1,4 @@
-import { MessageIntent } from '@types/index';
+import { MessageIntent } from '../types';
 
 // Intent detection patterns for different languages
 const intentPatterns: Record<string, Record<MessageIntent, RegExp[]>> = {

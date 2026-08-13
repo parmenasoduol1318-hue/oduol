@@ -12,102 +12,39 @@ export type AppLanguage =
   | "sw";
 
 interface SettingsState {
-  /* ==========================================
-     Appearance
-  ========================================== */
-
   theme: ThemeMode;
-
   fontScale: number;
-
-  /* ==========================================
-     Language
-  ========================================== */
-
   language: AppLanguage;
-
-  /* ==========================================
-     Notifications
-  ========================================== */
-
   notificationsEnabled: boolean;
-
   soundEnabled: boolean;
-
   vibrationEnabled: boolean;
-
-  /* ==========================================
-     Privacy
-  ========================================== */
-
   biometricLogin: boolean;
-
   saveChatHistory: boolean;
-
   saveMemories: boolean;
-
   analyticsEnabled: boolean;
-
-  /* ==========================================
-     AI
-  ========================================== */
-
   autoPlayVoice: boolean;
-
   autoDetectLanguage: boolean;
 
-  /* ==========================================
-     Actions
-  ========================================== */
+  darkMode: boolean;
+  notifications: boolean;
+  autoSaveChats: boolean;
 
-  setTheme: (
-    theme: ThemeMode
-  ) => void;
-
-  setFontScale: (
-    scale: number
-  ) => void;
-
-  setLanguage: (
-    language: AppLanguage
-  ) => void;
-
-  setNotificationsEnabled: (
-    value: boolean
-  ) => void;
-
-  setSoundEnabled: (
-    value: boolean
-  ) => void;
-
-  setVibrationEnabled: (
-    value: boolean
-  ) => void;
-
-  setBiometricLogin: (
-    value: boolean
-  ) => void;
-
-  setSaveChatHistory: (
-    value: boolean
-  ) => void;
-
-  setSaveMemories: (
-    value: boolean
-  ) => void;
-
-  setAnalyticsEnabled: (
-    value: boolean
-  ) => void;
-
-  setAutoPlayVoice: (
-    value: boolean
-  ) => void;
-
-  setAutoDetectLanguage: (
-    value: boolean
-  ) => void;
-
+  setTheme: (theme: ThemeMode) => void;
+  setFontScale: (scale: number) => void;
+  setLanguage: (language: AppLanguage) => void;
+  setNotificationsEnabled: (value: boolean) => void;
+  setSoundEnabled: (value: boolean) => void;
+  setVibrationEnabled: (value: boolean) => void;
+  setBiometricLogin: (value: boolean) => void;
+  setSaveChatHistory: (value: boolean) => void;
+  setSaveMemories: (value: boolean) => void;
+  setAnalyticsEnabled: (value: boolean) => void;
+  setAutoPlayVoice: (value: boolean) => void;
+  setAutoDetectLanguage: (value: boolean) => void;
+  toggleDarkMode: (value?: boolean) => void;
+  toggleNotifications: (value?: boolean) => void;
+  toggleAutoPlayVoice: (value?: boolean) => void;
+  toggleAutoSaveChats: (value?: boolean) => void;
   reset: () => void;
 }
 
@@ -135,18 +72,16 @@ const initialState = {
   autoPlayVoice: true,
 
   autoDetectLanguage: true,
+  darkMode: false,
+  notifications: true,
+  autoSaveChats: true,
 };
 
 export const useSettingsStore =
   create<SettingsState>((set) => ({
     ...initialState,
 
-    setTheme: (
-      theme
-    ) =>
-      set({
-        theme,
-      }),
+    setTheme: (theme) => set({ theme }),
 
     setFontScale: (
       fontScale
@@ -211,12 +146,12 @@ export const useSettingsStore =
         analyticsEnabled,
       }),
 
-    setAutoPlayVoice: (
-      autoPlayVoice
-    ) =>
-      set({
-        autoPlayVoice,
-      }),
+    setAutoPlayVoice: (autoPlayVoice) => set({ autoPlayVoice }),
+
+    toggleDarkMode: (value) => set((state) => ({ darkMode: value ?? !state.darkMode })),
+    toggleNotifications: (value) => set((state) => ({ notifications: value ?? !state.notifications })),
+    toggleAutoPlayVoice: (value) => set((state) => ({ autoPlayVoice: value ?? !state.autoPlayVoice })),
+    toggleAutoSaveChats: (value) => set((state) => ({ autoSaveChats: value ?? !state.autoSaveChats })),
 
     setAutoDetectLanguage: (
       autoDetectLanguage

@@ -23,7 +23,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@/*": [
         "./*"
@@ -76,7 +76,8 @@
     "checkJs": false,
     "types": [
       "react",
-      "react-native"
+      "react-native",
+      "jest"
     ]
   },
   "include": [

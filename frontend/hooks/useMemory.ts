@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import api from "../lib/api";
+import { api } from "../services/api/client";
+import API_ENDPOINTS from "../services/api/endpoints";
 import { logger } from "../lib/logger";
 
 export interface MemoryItem {
@@ -25,10 +26,10 @@ export const useMemory = () => {
     setError(null);
 
     try {
-      const res = await api.get<MemoryResponse>("/memory");
+      const res = await api.get<MemoryItem[]>(API_ENDPOINTS.MEMORY.LIST);
 
-      setMemories(res.data.data || []);
-      return res.data;
+      setMemories(res || []);
+      return { success: true, data: res || [], message: "Memories loaded" };
     } catch (err: any) {
       const message =
         err?.response?.data?.detail ||
@@ -50,14 +51,14 @@ export const useMemory = () => {
 
   const saveMemory = useCallback(async (content: string, type: MemoryItem["type"]) => {
     try {
-      const res = await api.post<MemoryResponse>("/memory", {
+      const res = await api.post<MemoryItem>(API_ENDPOINTS.MEMORY.CREATE, {
         content,
-        type,
+        metadata: { type },
       });
 
-      setMemories((prev) => [...prev, ...(res.data.data || [])]);
+      setMemories((prev) => [...prev, { ...res, id: String(res.id ?? prev.length), type, createdAt: new Date().toISOString() }]);
 
-      return res.data;
+      return { success: true, data: [{ ...res, id: String(res.id ?? Date.now()), type, createdAt: new Date().toISOString() }], message: "Memory saved" };
     } catch (err: any) {
       const message =
         err?.response?.data?.detail ||
@@ -76,7 +77,7 @@ export const useMemory = () => {
 
   const clearMemory = useCallback(async (id: string) => {
     try {
-      await api.delete(`/memory/${id}`);
+      await api.delete(API_ENDPOINTS.MEMORY.DELETE(id));
 
       setMemories((prev) => prev.filter((m) => m.id !== id));
 

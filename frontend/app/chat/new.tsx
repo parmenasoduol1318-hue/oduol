@@ -26,9 +26,7 @@ export default function NewChatScreen() {
     try {
       setLoading(true);
 
-      const chat = await chatService.createChat({
-        title,
-      });
+      const chat = await chatService.createChat(title);
 
       router.replace(`/chat/${chat.id}`);
     } catch (error) {

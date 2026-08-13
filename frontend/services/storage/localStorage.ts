@@ -96,7 +96,7 @@ class LocalStorageService {
    * Get all stored keys.
    */
   async keys(): Promise<string[]> {
-    return await AsyncStorage.getAllKeys();
+    return [...(await AsyncStorage.getAllKeys())] as string[];
   }
 
   /**

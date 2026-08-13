@@ -16,7 +16,7 @@ import Colors from "../../constants/colors";
 import { useAuthStore } from "../../store/authStore";
 
 export default function LoginForm() {
-  const login = useAuthStore((state) => state.login);
+  const login = useAuthStore((state: ReturnType<typeof useAuthStore.getState>) => state.login);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

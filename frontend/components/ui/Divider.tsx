@@ -28,7 +28,7 @@ export default function Divider({
   spacing = 12,
   style,
 }: DividerProps) {
-  const dividerStyle =
+  const dividerStyle: ViewStyle =
     orientation === "horizontal"
       ? {
           height: thickness,
@@ -46,9 +46,7 @@ export default function Divider({
       style={[
         styles.divider,
         dividerStyle,
-        {
-          backgroundColor: color,
-        },
+        { backgroundColor: color },
         style,
       ]}
     />

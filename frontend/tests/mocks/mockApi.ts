@@ -27,7 +27,7 @@ export const errorResponse = (
    Mock API Client
 ====================================================== */
 
-export const mockApi = {
+export const mockApi: any = {
   get: jest.fn(),
   post: jest.fn(),
   put: jest.fn(),
@@ -40,7 +40,7 @@ export const mockApi = {
 ====================================================== */
 
 export function resetMockApi() {
-  Object.values(mockApi).forEach((fn) =>
+  Object.values(mockApi as Record<string, any>).forEach((fn: any) =>
     fn.mockReset()
   );
 }

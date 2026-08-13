@@ -14,7 +14,8 @@ import Colors from "../constants/colors";
 import { useAuthStore } from "../store/authStore";
 
 export default function SplashScreen() {
-  const { isAuthenticated, initialize } = useAuthStore();
+  const isAuthenticated = useAuthStore((state: ReturnType<typeof useAuthStore.getState>) => state.isAuthenticated);
+  const initialize = useAuthStore((state: ReturnType<typeof useAuthStore.getState>) => state.initialize);
 
   useEffect(() => {
     const bootstrap = async () => {
@@ -24,7 +25,7 @@ export default function SplashScreen() {
         // Small delay for branding
         await new Promise((resolve) => setTimeout(resolve, 1800));
 
-        if (isAuthenticated) {
+        if (isAuthenticated()) {
           router.replace("/(tabs)");
         } else {
           router.replace("/auth/login");

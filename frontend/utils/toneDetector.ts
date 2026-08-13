@@ -1,4 +1,4 @@
-import { MessageTone } from '@types/index';
+import { MessageTone } from '../types';
 
 // Tone detection keywords for different languages
 const toneKeywords: Record<string, Record<MessageTone, string[]>> = {

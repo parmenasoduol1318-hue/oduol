@@ -4,7 +4,7 @@ import axios from "axios";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://swiftreply-njbt.onrender.com";
+  "https://swiftreply-njbt.onrender.com/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -29,126 +29,69 @@ export interface ApiResponse<T = any> {
   data: T;
 }
 
-/**
- * Attach JWT token to future requests.
- */
 export function setAccessToken(token: string) {
-  api.defaults.headers.common.Authorization =
-    `Bearer ${token}`;
+  api.defaults.headers.common.Authorization = `Bearer ${token}`;
 }
 
-/**
- * Remove JWT token.
- */
 export function clearAccessToken() {
   delete api.defaults.headers.common.Authorization;
 }
 
-/* ======================================================
-   M-PESA
-====================================================== */
-
-export async function initiateMpesaPayment(
-  payload: MpesaSTKRequest
-) {
-  const response =
-    await api.post<ApiResponse>(
-      "/api/payments/mpesa/stkpush",
-      payload
-    );
+export async function initiateMpesaPayment(payload: MpesaSTKRequest) {
+  const response = await api.post<ApiResponse>("/payments", {
+    amount: payload.amount ?? 0,
+    currency: "KES",
+    provider: "MPESA",
+    phone_number: payload.phone_number,
+  });
 
   return response.data;
 }
 
-export async function checkMpesaPayment(
-  checkoutRequestId: string
-) {
-  const response =
-    await api.get<ApiResponse>(
-      `/api/payments/mpesa/status/${checkoutRequestId}`
-    );
+export async function checkMpesaPayment(checkoutRequestId: string) {
+  const response = await api.get<ApiResponse>(`/payments/${checkoutRequestId}`);
+  return response.data;
+}
+
+export async function createPaypalOrder(payload: PaypalOrderRequest) {
+  const response = await api.post<ApiResponse>("/payments", {
+    amount: 0,
+    currency: "USD",
+    provider: "PAYPAL",
+    plan: payload.plan,
+  });
 
   return response.data;
 }
 
-/* ======================================================
-   PAYPAL
-====================================================== */
-
-export async function createPaypalOrder(
-  payload: PaypalOrderRequest
-) {
-  const response =
-    await api.post<ApiResponse>(
-      "/api/payments/paypal/create-order",
-      payload
-    );
-
+export async function capturePaypalOrder(orderId: string) {
+  const response = await api.get<ApiResponse>(`/payments/${orderId}`);
   return response.data;
 }
-
-export async function capturePaypalOrder(
-  orderId: string
-) {
-  const response =
-    await api.post<ApiResponse>(
-      `/api/payments/paypal/capture/${orderId}`
-    );
-
-  return response.data;
-}
-
-/* ======================================================
-   SUBSCRIPTION
-====================================================== */
 
 export async function getSubscriptionStatus() {
-  const response =
-    await api.get<ApiResponse>(
-      "/api/subscription/me"
-    );
-
+  const response = await api.get<ApiResponse>("/subscriptions/me");
   return response.data;
 }
 
 export async function cancelSubscription() {
-  const response =
-    await api.post<ApiResponse>(
-      "/api/subscription/cancel"
-    );
-
+  const response = await api.delete<ApiResponse>("/subscriptions/cancel");
   return response.data;
 }
-
-/* ======================================================
-   PAYMENT HISTORY
-====================================================== */
 
 export async function getPaymentHistory() {
-  const response =
-    await api.get<ApiResponse>(
-      "/api/payments/history"
-    );
-
+  const response = await api.get<ApiResponse>("/payments/history");
   return response.data;
 }
-
-/* ======================================================
-   EXPORT
-====================================================== */
 
 export default {
   setAccessToken,
   clearAccessToken,
-
   initiateMpesaPayment,
   checkMpesaPayment,
-
   createPaypalOrder,
   capturePaypalOrder,
-
   getSubscriptionStatus,
   cancelSubscription,
-
   getPaymentHistory,
 };

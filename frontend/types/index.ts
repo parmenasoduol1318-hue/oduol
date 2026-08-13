@@ -1,108 +1,36 @@
 // frontend/types/index.ts
 
-/* ======================================================
-   Authentication
-====================================================== */
+export type MessageIntent =
+  | "question"
+  | "statement"
+  | "request"
+  | "warning"
+  | "flirting"
+  | "joking"
+  | "help_request"
+  | "complaint"
+  | "compliment";
 
-export * from "./auth";
-
-/* ======================================================
-   Users
-====================================================== */
-
-export * from "./user";
-
-/* ======================================================
-   Chat
-====================================================== */
-
-export * from "./chat";
-
-/* ======================================================
-   Messages
-====================================================== */
-
-export * from "./message";
-
-/* ======================================================
-   Memory
-====================================================== */
-
-export * from "./memory";
-
-/* ======================================================
-   Images
-====================================================== */
-
-export * from "./image";
-
-/* ======================================================
-   Voice
-====================================================== */
-
-export * from "./voice";
-
-/* ======================================================
-   Payments
-====================================================== */
-
-export * from "./payment";
-
-/* ======================================================
-   Subscription
-====================================================== */
-
-export * from "./subscription";
-
-/* ======================================================
-   Settings
-====================================================== */
-
-export * from "./settings";
-
-/* ======================================================
-   Notifications
-====================================================== */
-
-export * from "./notification";
-
-/* ======================================================
-   API
-====================================================== */
-
-export * from "./api";
-
-/* ======================================================
-   Navigation
-====================================================== */
-
-export * from "./navigation";
-
-/* ======================================================
-   Generic Utility Types
-====================================================== */
+export type MessageTone =
+  | "friendly"
+  | "serious"
+  | "angry"
+  | "formal"
+  | "joking"
+  | "confused"
+  | "supportive"
+  | "neutral";
 
 export type Nullable<T> = T | null;
-
 export type Optional<T> = T | undefined;
-
 export type ID = string;
-
 export type ISODateString = string;
-
-/* ======================================================
-   Common API Response
-====================================================== */
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
   data: T;
 }
-
-/* ======================================================
-   Pagination
-====================================================== */
 
 export interface Pagination {
   page: number;
@@ -111,81 +39,22 @@ export interface Pagination {
   totalPages: number;
 }
 
-export interface PaginatedResponse<T> {
-  items: T[];
-  pagination: Pagination;
-}
-
-/* ======================================================
-   Loading State
-====================================================== */
-
 export interface LoadingState {
   loading: boolean;
   error: string | null;
 }
 
-/* ======================================================
-   Theme
-====================================================== */
-
-export type ThemeMode =
-  | "light"
-  | "dark"
-  | "system";
-
-/* ======================================================
-   Languages
-====================================================== */
-
-export type AppLanguage =
-  | "en"
-  | "sw";
-
-/* ======================================================
-   User Roles
-====================================================== */
-
-export type UserRole =
-  | "user"
-  | "admin";
-
-/* ======================================================
-   Subscription Plans
-====================================================== */
-
-export type SubscriptionPlan =
-  | "FREE"
-  | "PRO";
-
-/* ======================================================
-   Payment Providers
-====================================================== */
-
-export type PaymentProvider =
-  | "MPESA"
-  | "PAYPAL";
-
-/* ======================================================
-   Network Status
-====================================================== */
-
-export type NetworkStatus =
-  | "online"
-  | "offline";
-
-/* ======================================================
-   Generic Select Option
-====================================================== */
+export type ThemeMode = "light" | "dark" | "system";
+export type AppLanguage = "en" | "sw";
+export type UserRole = "user" | "admin";
+export type SubscriptionPlan = "FREE" | "PRO";
+export type PaymentProvider = "MPESA" | "PAYPAL";
+export type NetworkStatus = "online" | "offline";
 
 export interface SelectOption {
   label: string;
   value: string;
 }
-
-/* ======================================================
-   Generic Key/Value
-====================================================== */
 
 export interface KeyValue<T = string> {
   key: string;

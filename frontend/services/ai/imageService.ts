@@ -1,10 +1,7 @@
 // frontend/services/ai/imageService.ts
 
-import axios, { AxiosInstance } from "axios";
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://swiftreply-njbt.onrender.com";
+import { api } from "../api/client";
+import API_ENDPOINTS from "../api/endpoints";
 
 /* ======================================================
    Types
@@ -12,29 +9,21 @@ const API_URL =
 
 export interface ImageGenerationRequest {
   prompt: string;
-
   size?: "1024x1024" | "1024x1536" | "1536x1024";
-
   quality?: "standard" | "high";
-
   n?: number;
 }
 
 export interface GeneratedImage {
   id: string;
-
   image_url: string;
-
   prompt: string;
-
   created_at: string;
 }
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
-
   message: string;
-
   data: T;
 }
 
@@ -43,99 +32,41 @@ export interface ApiResponse<T = unknown> {
 ====================================================== */
 
 class ImageService {
-  private api: AxiosInstance;
+  async generateImage(payload: ImageGenerationRequest) {
+    return api.post(API_ENDPOINTS.IMAGES.GENERATE, payload);
+  }
 
-  constructor() {
-    this.api = axios.create({
-      baseURL: API_URL,
-      timeout: 180000,
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
+  async editImage(formData: FormData) {
+    return api.post(API_ENDPOINTS.IMAGES.EDIT, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
   }
 
-  /* ==========================================
-     Authentication
-  ========================================== */
-
-  setAccessToken(token: string) {
-    this.api.defaults.headers.common.Authorization =
-      `Bearer ${token}`;
+  async upscaleImage(formData: FormData) {
+    return api.post(API_ENDPOINTS.IMAGES.UPSCALE, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   }
 
-  clearAccessToken() {
-    delete this.api.defaults.headers.common.Authorization;
+  async removeBackground(formData: FormData) {
+    return api.post(API_ENDPOINTS.IMAGES.REMOVE_BACKGROUND, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   }
-
-  /* ==========================================
-     Generate Images
-  ========================================== */
-
-  async generateImage(
-    payload: ImageGenerationRequest
-  ) {
-    const response =
-      await this.api.post<
-        ApiResponse<GeneratedImage[]>
-      >(
-        "/api/images/generate",
-        payload
-      );
-
-    return response.data;
-  }
-
-  /* ==========================================
-     Image History
-  ========================================== */
 
   async getHistory() {
-    const response =
-      await this.api.get<
-        ApiResponse<GeneratedImage[]>
-      >("/api/images/history");
-
-    return response.data;
+    return api.get(API_ENDPOINTS.IMAGES.HISTORY);
   }
 
-  /* ==========================================
-     Get Single Image
-  ========================================== */
-
-  async getImage(
-    imageId: string
-  ) {
-    const response =
-      await this.api.get<
-        ApiResponse<GeneratedImage>
-      >(
-        `/api/images/${imageId}`
-      );
-
-    return response.data;
+  async getImage(imageId: string | number) {
+    return api.get(API_ENDPOINTS.IMAGES.DELETE(imageId));
   }
 
-  /* ==========================================
-     Delete Image
-  ========================================== */
-
-  async deleteImage(
-    imageId: string
-  ) {
-    const response =
-      await this.api.delete<
-        ApiResponse
-      >(
-        `/api/images/${imageId}`
-      );
-
-    return response.data;
+  async deleteImage(imageId: string | number) {
+    return api.delete(API_ENDPOINTS.IMAGES.DELETE(imageId));
   }
 }
 
-const imageService =
-  new ImageService();
+const imageService = new ImageService();
 
 export default imageService;
