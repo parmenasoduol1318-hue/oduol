@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 import Colors from "../../constants/colors";
 
@@ -19,48 +20,56 @@ const FEATURES = [
     subtitle: "Talk with SwiftReply AI",
     icon: "chatbubble-ellipses",
     color: "#3B82F6",
+    route: "/(tabs)/chats",
   },
   {
     title: "Image Generator",
     subtitle: "Create AI images",
     icon: "image",
     color: "#EC4899",
+    route: "/(tabs)/images",
   },
   {
     title: "Voice Assistant",
     subtitle: "Speak naturally",
     icon: "mic",
     color: "#10B981",
+    route: "/(tabs)/voice",
   },
   {
     title: "Code Assistant",
     subtitle: "Generate & debug code",
     icon: "code-slash",
     color: "#8B5CF6",
+    route: "/(tabs)/chats",
   },
   {
     title: "Translator",
     subtitle: "Translate over 100 languages",
     icon: "language",
     color: "#F59E0B",
+    route: "/(tabs)/chats",
   },
   {
     title: "Summarizer",
     subtitle: "Summarize PDFs & text",
     icon: "document-text",
     color: "#EF4444",
+    route: "/(tabs)/chats",
   },
   {
     title: "Research",
     subtitle: "AI-powered web research",
     icon: "search",
     color: "#06B6D4",
+    route: "/(tabs)/chats",
   },
   {
     title: "Memory",
     subtitle: "Personal AI memory",
     icon: "brain",
     color: "#14B8A6",
+    route: "/(tabs)/profile",
   },
 ];
 
@@ -83,6 +92,7 @@ export default function ExploreScreen() {
               key={feature.title}
               style={styles.card}
               activeOpacity={0.85}
+              onPress={() => feature.route && router.push(feature.route as any)}
             >
               <View
                 style={[

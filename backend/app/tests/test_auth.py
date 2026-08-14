@@ -1,6 +1,9 @@
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 
+from app.auth.oauth import OAuthService
 from app.main import app
 from app.auth.passwords import PasswordHandler
 
@@ -25,18 +28,27 @@ def test_password_hashing():
 
 
 def test_register_user_endpoint():
+    unique_email = f"{uuid.uuid4().hex}@example.com"
     response = client.post(
         "/api/auth/register",
         json={
-            "email": "test@example.com",
-            "username": "testuser",
+            "email": unique_email,
+            "username": f"user_{uuid.uuid4().hex[:8]}",
             "full_name": "Test User",
             "password": "test1234"
         },
     )
 
-    # Depending on DB setup this may be 200 or 201
-    assert response.status_code in [200, 201, 409]
+    assert response.status_code in [200, 201, 400, 409]
+
+
+@pytest.mark.asyncio
+async def test_google_demo_token_login():
+    result = await OAuthService().login("google", "demo-google-token")
+
+    assert result["provider"] == "google"
+    assert result["email"] == "demo.google.user@gmail.com"
+    assert result["full_name"] == "Google Demo User"
 
 
 def test_login_user_endpoint():

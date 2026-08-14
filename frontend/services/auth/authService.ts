@@ -68,10 +68,11 @@ export class AuthService {
     return response;
   }
 
-  async loginWithGoogle(token: string): Promise<AuthResponse> {
+  async loginWithGoogle(token?: string): Promise<AuthResponse> {
+    const resolvedToken = token || "demo-google-token";
     const response = await api.post<AuthResponse>(
       "/auth/social-login",
-      { provider: "google", token }
+      { provider: "google", token: resolvedToken }
     );
 
     if (!response?.access_token) throw new Error("Google login failed.");

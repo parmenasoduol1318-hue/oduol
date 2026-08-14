@@ -26,8 +26,14 @@ export default function HomeScreen() {
     {
       title: "Voice Assistant",
       icon: "mic",
-      route: "/(tabs)/chats",
+      route: "/(tabs)/voice",
       color: "#059669",
+    },
+    {
+      title: "Explore",
+      icon: "compass",
+      route: "/(tabs)/explore",
+      color: "#10B981",
     },
     {
       title: "History",

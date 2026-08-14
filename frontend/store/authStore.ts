@@ -26,7 +26,7 @@ interface AuthState {
     password: string
   ) => Promise<AuthUser>;
 
-  loginWithGoogle: (token: string) => Promise<AuthUser>;
+  loginWithGoogle: (token?: string) => Promise<AuthUser>;
 
   register: (
     full_name: string,

@@ -1,7 +1,8 @@
 // frontend/app/(tabs)/voice.tsx
 
-import React from "react";
+import React, { useState } from "react";
 import {
+  Alert,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -9,14 +10,27 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 import Colors from "../../constants/colors";
 
 export default function VoiceScreen() {
+  const [listening, setListening] = useState(false);
+
+  const handleListen = () => {
+    setListening((current) => !current);
+    Alert.alert(
+      listening ? "Voice paused" : "Voice assistant ready",
+      listening
+        ? "Your voice assistant is paused. Tap again to resume listening."
+        : "You can now speak naturally and SwiftReply will respond with AI guidance."
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <View style={styles.iconContainer}>
+        <View style={[styles.iconContainer, listening && styles.iconContainerActive]}>
           <Ionicons
             name="mic"
             size={90}
@@ -32,7 +46,7 @@ export default function VoiceScreen() {
           Talk naturally with SwiftReply using your voice.
         </Text>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={handleListen}>
           <Ionicons
             name="mic"
             size={26}
@@ -40,11 +54,11 @@ export default function VoiceScreen() {
           />
 
           <Text style={styles.buttonText}>
-            Start Listening
+            {listening ? "Stop Listening" : "Start Listening"}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.secondaryButton}>
+        <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push("/(tabs)/chats")}>
           <Ionicons
             name="chatbubble-ellipses-outline"
             size={22}
@@ -62,7 +76,7 @@ export default function VoiceScreen() {
           </Text>
 
           <Text style={styles.status}>
-            🎤 Ready to listen
+            {listening ? "🎤 Listening live" : "🎤 Ready to listen"}
           </Text>
         </View>
       </View>
@@ -91,6 +105,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 30,
+  },
+
+  iconContainerActive: {
+    backgroundColor: "#DCFCE7",
+    borderWidth: 2,
+    borderColor: "#10B981",
   },
 
   title: {
