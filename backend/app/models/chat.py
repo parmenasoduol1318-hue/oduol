@@ -25,6 +25,13 @@ class Chat(Base):
     user = relationship("User", backref="chats")
     messages = relationship(
         "Message",
-        backref="chat",
+        back_populates="chat",
         cascade="all, delete-orphan",
+        order_by="Message.created_at.asc()",
     )
+
+    @property
+    def last_message(self):
+        if not self.messages:
+            return None
+        return self.messages[-1].content

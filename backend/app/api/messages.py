@@ -30,16 +30,24 @@ router = APIRouter()
     response_model=MessageResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def send_message(
+async def send_message(
     payload: MessageCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return ChatService.send_message(
+    result = await ChatService.send_message(
         db=db,
         user=current_user,
         payload=payload,
     )
+
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chat not found.",
+        )
+
+    return result
 
 
 # ==========================================================
@@ -159,16 +167,24 @@ def delete_message(
 @router.post(
     "/{message_id}/regenerate",
 )
-def regenerate_ai_reply(
+async def regenerate_ai_reply(
     message_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return ChatService.regenerate_ai_reply(
+    result = await ChatService.regenerate_ai_reply(
         db=db,
         message_id=message_id,
         user=current_user,
     )
+
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Message not found.",
+        )
+
+    return result
 
 
 # ==========================================================

@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.message import MessageResponse
+
 
 # ==========================================================
 # Base
@@ -42,6 +44,8 @@ class ChatResponse(ChatBase):
     user_id: int
     created_at: datetime
     updated_at: datetime
+    last_message: str | None = None
+    messages: list[MessageResponse] = []
 
     model_config = ConfigDict(
         from_attributes=True,

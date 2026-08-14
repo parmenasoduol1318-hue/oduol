@@ -35,7 +35,7 @@ const API_ENDPOINTS = {
   },
 
   MESSAGES: {
-    LIST: (chatId: number | string) => `/messages/${chatId}`,
+    LIST: (chatId: number | string) => `/messages/chat/${chatId}`,
     SEND: "/messages",
     DELETE: (messageId: number | string) => `/messages/${messageId}`,
   },

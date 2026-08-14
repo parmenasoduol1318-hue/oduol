@@ -21,3 +21,4 @@ class Message(Base):
 
     # Relationships
     user = relationship("User", backref="messages")
+    chat = relationship("Chat", back_populates="messages")
