@@ -26,6 +26,8 @@ export interface ChatSession {
   title: string | null;
   created_at: string;
   updated_at: string;
+  last_message?: string | null;
+  messages?: ChatMessage[];
 }
 
 export interface RenameChatRequest {
@@ -43,6 +45,17 @@ class ChatService {
 
   async getChat(chatId: number): Promise<ChatSession> {
     return api.get<ChatSession>(API_ENDPOINTS.CHATS.DETAILS(chatId));
+  }
+
+  async getMessages(chatId: number): Promise<ChatMessage[]> {
+    return api.get<ChatMessage[]>(API_ENDPOINTS.MESSAGES.LIST(chatId));
+  }
+
+  async sendMessage(chatId: number, content: string): Promise<ChatMessage> {
+    return api.post<ChatMessage>(API_ENDPOINTS.MESSAGES.SEND, {
+      chat_id: chatId,
+      content,
+    });
   }
 
   async renameChat(chatId: number, title: string): Promise<ChatSession> {

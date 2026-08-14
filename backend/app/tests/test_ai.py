@@ -1,7 +1,31 @@
 import pytest
-from unittest.mock import AsyncMock, patch
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, Mock, patch
 
 from app.services.ai_service import AIService
+
+
+@pytest.mark.asyncio
+async def test_ai_chat_contract():
+    ai_service = AIService()
+    mock_db = Mock()
+    mock_user = SimpleNamespace(id=42)
+    payload = SimpleNamespace(prompt="Hello there", chat_id=7)
+
+    with patch.object(ai_service.chat_service, "add_message") as mock_add_message, \
+         patch.object(ai_service.workflows, "chat", new_callable=AsyncMock) as mock_workflow_chat:
+        mock_workflow_chat.return_value = "Hi from AI"
+
+        response = await ai_service.chat(
+            db=mock_db,
+            user=mock_user,
+            payload=payload,
+        )
+
+        assert response["response"] == "Hi from AI"
+        assert response["chat_id"] == 7
+        assert mock_add_message.call_count == 2
+        mock_workflow_chat.assert_awaited_once_with("Hello there")
 
 
 @pytest.mark.asyncio

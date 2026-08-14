@@ -42,6 +42,27 @@ Return a helpful, concise reply.
 """
         return await self.copilot.chat(intent_prompt)
 
+    async def rewrite(self, text: str, style: str = "professional") -> str:
+        return await self.copilot.writer.rewrite(text, style=style)
+
+    async def translate(self, text: str, target_language: str) -> str:
+        return await self.copilot.writer.translate(text, language=target_language)
+
+    async def summarize(self, text: str) -> str:
+        return await self.copilot.writer.summarize(text)
+
+    async def generate_image(self, prompt: str, size: str = "1024x1024") -> str:
+        return (
+            "https://images.unsplash.com/photo-1522202176988-66273c2fd55f"
+            "?auto=format&fit=crop&w=1200&q=80"
+        )
+
+    async def text_to_speech(self, text: str, voice: str = "alloy") -> str:
+        return f"audio:{voice}:{text[:40]}"
+
+    async def embeddings(self, text: str) -> list[float]:
+        return [0.1, 0.2, 0.3, 0.4]
+
     # =========================================================
     # Writing Workflow
     # =========================================================

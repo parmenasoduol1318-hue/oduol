@@ -132,6 +132,34 @@ class ChatService:
 
         return True
 
+    @staticmethod
+    def add_message(
+        db: Session,
+        chat_id: int,
+        user_id: int,
+        role: str,
+        content: str,
+    ) -> Message:
+        chat = (
+            db.query(Chat)
+            .filter(Chat.id == chat_id)
+            .first()
+        )
+
+        if chat is None:
+            raise ValueError("Chat not found")
+
+        message = Message(
+            chat_id=chat_id,
+            user_id=user_id,
+            role=role,
+            content=content,
+        )
+        db.add(message)
+        db.commit()
+        db.refresh(message)
+        return message
+
     # ==========================================================
     # Send Message
     # ==========================================================
@@ -151,29 +179,25 @@ class ChatService:
         if chat is None:
             return None
 
-        user_message = Message(
+        user_message = ChatService.add_message(
+            db=db,
             chat_id=payload.chat_id,
             user_id=user.id,
             role="user",
             content=payload.content,
         )
-        db.add(user_message)
-        db.commit()
-        db.refresh(user_message)
 
         from app.services.ai_service import ai_service
 
         reply = await ai_service.smart_reply(payload.content)
 
-        assistant_message = Message(
+        assistant_message = ChatService.add_message(
+            db=db,
             chat_id=payload.chat_id,
             user_id=user.id,
             role="assistant",
             content=reply,
         )
-        db.add(assistant_message)
-        db.commit()
-        db.refresh(assistant_message)
 
         return assistant_message
 

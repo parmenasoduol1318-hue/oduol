@@ -85,9 +85,9 @@ export const useChatStore = create<ChatState>((set) => ({
   fetchMessages: async (chatId) => {
     try {
       set({ loading: true });
-      const response = await chatService.getChat(Number(chatId));
-      const messages = Array.isArray((response as any).messages)
-        ? (response as any).messages.map((message: any) => ({
+      const response = await chatService.getMessages(Number(chatId));
+      const messages = Array.isArray(response)
+        ? response.map((message: any) => ({
             id: String(message.id ?? Date.now()),
             role: (message.role ?? "assistant") as MessageRole,
             content: message.content ?? "",
@@ -98,9 +98,9 @@ export const useChatStore = create<ChatState>((set) => ({
       set((state) => ({
         chats: state.chats.some((chat) => chat.id === chatId)
           ? state.chats.map((chat) =>
-              chat.id === chatId ? { ...chat, messages } : chat
+              chat.id === chatId ? { ...chat, messages, last_message: messages.at(-1)?.content ?? chat.last_message ?? "" } : chat
             )
-          : [...state.chats, { id: chatId, title: "Chat", messages, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }],
+          : [...state.chats, { id: chatId, title: "Chat", messages, last_message: messages.at(-1)?.content ?? "", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }],
         loading: false,
       }));
     } catch (error) {
@@ -112,27 +112,53 @@ export const useChatStore = create<ChatState>((set) => ({
   sendMessage: async (chatId, content) => {
     const createdAt = new Date().toISOString();
     const userMessage: ChatMessage = { id: String(Date.now()), role: "user", content, createdAt };
+
     set((state) => ({
       chats: state.chats.map((chat) =>
         chat.id === chatId
-          ? { ...chat, messages: [...chat.messages, userMessage], updatedAt: createdAt }
+          ? { ...chat, messages: [...chat.messages, userMessage], last_message: content, updatedAt: createdAt }
           : chat
       ),
     }));
 
     try {
-      const response = await chatService.getChat(Number(chatId));
-      const reply = (response as any)?.last_message ?? "Thanks!";
-      const aiMessage: ChatMessage = { id: String(Date.now() + 1), role: "assistant", content: reply, createdAt: new Date().toISOString() };
+      const response = await chatService.sendMessage(Number(chatId), content);
+      const reply: ChatMessage = {
+        id: String(response.id ?? Date.now() + 1),
+        role: (response.role ?? "assistant") as MessageRole,
+        content: response.content ?? "",
+        createdAt: response.created_at ?? new Date().toISOString(),
+      };
+
       set((state) => ({
         chats: state.chats.map((chat) =>
           chat.id === chatId
-            ? { ...chat, messages: [...chat.messages, aiMessage], last_message: reply, updatedAt: new Date().toISOString() }
+            ? { ...chat, messages: [...chat.messages, reply], last_message: reply.content, updatedAt: reply.createdAt }
             : chat
         ),
       }));
     } catch (error) {
       console.error("sendMessage:", error);
+      set((state) => ({
+        chats: state.chats.map((chat) =>
+          chat.id === chatId
+            ? {
+                ...chat,
+                messages: [
+                  ...chat.messages,
+                  {
+                    id: String(Date.now() + 1000),
+                    role: "assistant",
+                    content: "I couldn't reach the AI service right now. Please try again.",
+                    createdAt: new Date().toISOString(),
+                  },
+                ],
+                last_message: "I couldn't reach the AI service right now. Please try again.",
+                updatedAt: new Date().toISOString(),
+              }
+            : chat
+        ),
+      }));
     }
   },
 

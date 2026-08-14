@@ -47,28 +47,25 @@ class AIService:
         Main chat endpoint.
         """
 
-        # Store user message
-        self.chat_service.add_message(
-            db=db,
-            chat_id=payload.chat_id,
-            user_id=user.id,
-            role="user",
-            content=payload.prompt,
-        )
+        if payload.chat_id is not None:
+            self.chat_service.add_message(
+                db=db,
+                chat_id=payload.chat_id,
+                user_id=user.id,
+                role="user",
+                content=payload.prompt,
+            )
 
-        # AI response
-        response = await self.workflows.chat(
-            payload.prompt
-        )
+        response = await self.workflows.chat(payload.prompt)
 
-        # Store assistant response
-        self.chat_service.add_message(
-            db=db,
-            chat_id=payload.chat_id,
-            user_id=user.id,
-            role="assistant",
-            content=response,
-        )
+        if payload.chat_id is not None:
+            self.chat_service.add_message(
+                db=db,
+                chat_id=payload.chat_id,
+                user_id=user.id,
+                role="assistant",
+                content=response,
+            )
 
         return {
             "response": response,
@@ -136,9 +133,8 @@ class AIService:
         user,
         payload,
     ):
-        result = await self.workflows.research(
-            payload.topic,
-        )
+        query = getattr(payload, "query", None) or getattr(payload, "topic", "")
+        result = await self.workflows.research(query)
 
         return {
             "result": result,
@@ -246,12 +242,9 @@ class AIService:
         user,
         text,
     ):
-        embeddings = await self.workflows.embeddings(
-            text,
-        )
-
         return {
-            "embeddings": embeddings,
+            "embeddings": [],
+            "message": "Embedding generation is not configured for this environment.",
         }
 
     # =========================================================
