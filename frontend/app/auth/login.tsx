@@ -16,27 +16,38 @@ import { Link, Stack, router } from "expo-router";
 import { useAuthStore } from "../../store/authStore";
 
 export default function LoginScreen() {
-  const login = useAuthStore((state: ReturnType<typeof useAuthStore.getState>) => state.login);
-  const loginWithGoogle = useAuthStore((state: ReturnType<typeof useAuthStore.getState>) => state.loginWithGoogle);
+  const login = useAuthStore((state) => state.login);
+  const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Missing Information", "Please enter your email and password.");
+    const cleanEmail = email.trim();
+
+    if (!cleanEmail || !password) {
+      Alert.alert(
+        "Missing Information",
+        "Please enter your email and password."
+      );
       return;
     }
 
     try {
       setLoading(true);
-      await login(email.trim(), password);
+
+      await login(cleanEmail, password);
+
       router.replace("/(tabs)/");
-    } catch (e: any) {
+    } catch (error: any) {
+      console.error("Login error:", error);
+
       Alert.alert(
         "Login Failed",
-        e?.response?.data?.detail || e?.message || "Unable to login."
+        error?.response?.data?.detail ||
+          error?.message ||
+          "Unable to login."
       );
     } finally {
       setLoading(false);
@@ -46,13 +57,20 @@ export default function LoginScreen() {
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
+
       const googleToken = "demo-google-token";
+
       await loginWithGoogle(googleToken);
+
       router.replace("/(tabs)/");
-    } catch (e: any) {
+    } catch (error: any) {
+      console.error("Google login error:", error);
+
       Alert.alert(
         "Google Sign-In Failed",
-        e?.response?.data?.detail || e?.message || "Unable to sign in with Google."
+        error?.response?.data?.detail ||
+          error?.message ||
+          "Unable to sign in with Google."
       );
     } finally {
       setLoading(false);
@@ -67,10 +85,17 @@ export default function LoginScreen() {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
           <Text style={styles.logo}>SwiftReply</Text>
+
           <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue chatting with SwiftReply AI.</Text>
+
+          <Text style={styles.subtitle}>
+            Sign in to continue chatting with SwiftReply AI.
+          </Text>
 
           <TextInput
             style={styles.input}
@@ -78,45 +103,74 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            autoComplete="email"
             value={email}
             onChangeText={setEmail}
+            editable={!loading}
           />
 
           <TextInput
             style={styles.input}
             placeholder="Password"
             secureTextEntry
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="password"
             value={password}
             onChangeText={setPassword}
+            editable={!loading}
+            onSubmitEditing={handleLogin}
           />
 
           <Link href="/auth/forgot-password" asChild>
-            <TouchableOpacity style={styles.forgotContainer}>
-              <Text style={styles.forgotText}>Forgot Password?</Text>
+            <TouchableOpacity
+              style={styles.forgotContainer}
+              disabled={loading}
+            >
+              <Text style={styles.forgotText}>
+                Forgot Password?
+              </Text>
             </TouchableOpacity>
           </Link>
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[
+              styles.button,
+              loading && styles.buttonDisabled,
+            ]}
             disabled={loading}
             onPress={handleLogin}
           >
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Login</Text>}
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>Login</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.googleButton, loading && styles.buttonDisabled]}
+            style={[
+              styles.googleButton,
+              loading && styles.buttonDisabled,
+            ]}
             disabled={loading}
             onPress={handleGoogleLogin}
           >
-            <Text style={styles.googleButtonText}>Continue with Google</Text>
+            <Text style={styles.googleButtonText}>
+              Continue with Google
+            </Text>
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+            <Text style={styles.footerText}>
+              Don't have an account?
+            </Text>
+
             <Link href="/auth/register" asChild>
-              <TouchableOpacity>
-                <Text style={styles.registerText}> Register</Text>
+              <TouchableOpacity disabled={loading}>
+                <Text style={styles.registerText}>
+                  Register
+                </Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -127,21 +181,105 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFFFFF" },
-  content: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 24 },
-  logo: { fontSize: 34, fontWeight: "700", color: "#2563EB", textAlign: "center", marginBottom: 20 },
-  title: { fontSize: 30, fontWeight: "700", color: "#111827", textAlign: "center", marginBottom: 8 },
-  subtitle: { fontSize: 15, color: "#6B7280", textAlign: "center", marginBottom: 30 },
-  input: { borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 12, backgroundColor: "#F9FAFB", paddingHorizontal: 16, paddingVertical: 15, marginBottom: 16, fontSize: 16 },
-  forgotContainer: { alignSelf: "flex-end", marginBottom: 24 },
-  forgotText: { color: "#2563EB", fontWeight: "600" },
-  button: { backgroundColor: "#2563EB", paddingVertical: 16, borderRadius: 12, alignItems: "center" },
-  googleButton: { backgroundColor: "#EA4335", paddingVertical: 15, borderRadius: 12, alignItems: "center", marginTop: 12 },
-  googleButtonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
-  buttonText: { color: "#fff", fontWeight: "700", fontSize: 15 },
-  buttonDisabled: { opacity: 0.7 },
-  footer: { flexDirection: "row", justifyContent: "center", marginTop: 28 },
-  footerText: { color: "#6B7280" },
-  registerText: { color: "#2563EB", fontWeight: "700", marginLeft: 4 },
-});
+  container: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
 
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+
+  logo: {
+    fontSize: 34,
+    fontWeight: "700",
+    color: "#2563EB",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+
+  title: {
+    fontSize: 30,
+    fontWeight: "700",
+    color: "#111827",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+
+  subtitle: {
+    fontSize: 15,
+    color: "#6B7280",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+    borderRadius: 12,
+    backgroundColor: "#F9FAFB",
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+
+  forgotContainer: {
+    alignSelf: "flex-end",
+    marginBottom: 24,
+  },
+
+  forgotText: {
+    color: "#2563EB",
+    fontWeight: "600",
+  },
+
+  button: {
+    backgroundColor: "#2563EB",
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+
+  googleButton: {
+    backgroundColor: "#EA4335",
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 12,
+  },
+
+  googleButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 15,
+  },
+
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 28,
+  },
+
+  footerText: {
+    color: "#6B7280",
+  },
+
+  registerText: {
+    color: "#2563EB",
+    fontWeight: "700",
+    marginLeft: 4,
+  },
+});
